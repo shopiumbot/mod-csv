@@ -600,7 +600,7 @@ class CsvImporter extends Component
         //$attributes['created_at'] = Yii::t('app/default', 'Дата создания');
         // $attributes['updated_at'] = Yii::t('app/default', 'Дата обновления');
         foreach (Attribute::find()->asArray()->all() as $attr) {
-            $attributes[$eav_prefix . $attr['name']] = $attr['translations'][0]['title'];
+            $attributes[$eav_prefix . $attr['id']] = $attr['title'];
         }
         return $attributes;
     }
@@ -645,7 +645,7 @@ class CsvImporter extends Component
             }
         } else {
             foreach (Attribute::find()->asArray()->all() as $attr) {
-                $attributes[$eav_prefix . $attr['name']] = $attr['translations'][0]['title'];
+                $attributes[$eav_prefix . $attr['id']] = $attr['title'];
             }
         }
 

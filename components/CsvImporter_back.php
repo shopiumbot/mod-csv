@@ -643,8 +643,8 @@ class CsvImporter_back extends \yii\base\Component
                 $attributes[$eav_prefix . $attr->name] = $attr->title;
             }
         } else {
-            foreach (Attribute::find()->joinWith(['translations'])->asArray()->all() as $attr) {
-                $attributes[$eav_prefix . $attr['name']] = $attr['translations'][0]['title'];
+            foreach (Attribute::find()->asArray()->all() as $attr) {
+                $attributes[$eav_prefix . $attr['id']] = $attr['title'];
             }
         }
 
