@@ -203,8 +203,7 @@ class CsvImporter_back extends \yii\base\Component
         //if (isset($data['sku']) && !empty($data['sku']) && $data['sku'] != '') {
         //   $query->where([Product::tableName() . '.sku' => $data['sku']]);
         // } else {
-        $query->joinWith('translations as translate');
-        $query->where(['translate.name' => $data['name']]); //$cr->compare('translate.name', $data['name']);
+        $query->where(['name' => $data['name']]); //$cr->compare('translate.name', $data['name']);
         // }
 
         $query->applyCategories($category_id);
@@ -382,8 +381,7 @@ class CsvImporter_back extends \yii\base\Component
             return $this->manufacturerCache[$name];
 
         $query = Manufacturer::find()
-            ->joinWith(['translations translate'])
-            ->where(['translate.name' => trim($name)]);
+            ->where(['name' => trim($name)]);
 
         // ->where(['name' => $name]);
 
@@ -485,13 +483,11 @@ class CsvImporter_back extends \yii\base\Component
         $parent = $this->rootCategory;
 
         $model = Category::find()
-            ->joinWith(['translations translate'])
-            ->where(['translate.name' => trim($result[0])])
+            ->where(['name' => trim($result[0])])
             ->one();
         if (!$model) {
             $model = new Category;
             $model->name = trim($result[0]);
-            $model->slug = CMS::slug($model->name);
             $model->appendTo($parent);
         }
         $first_model = $model;
@@ -499,15 +495,13 @@ class CsvImporter_back extends \yii\base\Component
 
         foreach ($result as $k => $name) {
             $model = $first_model->descendants()
-                ->joinWith(['translations'])
-                ->where([CategoryTranslate::tableName() . '.name' => trim($name)])
+                ->where(['name' => trim($name)])
                 //->where(['name'=>trim($name)]) //One language
                 ->one();
             $parent = $first_model;
             if (!$model) {
                 $model = new Category;
                 $model->name = $name;
-                $model->slug = CMS::slug($model->name);
                 $model->appendTo($parent);
             }
 
@@ -607,8 +601,8 @@ class CsvImporter_back extends \yii\base\Component
         $attributes['availability'] = Yii::t('app/default', 'Доступность. Принимает значение <code>1</code> - есть на складе, <code>2</code> - нет на складе, <code>3</code> - под заказ.<br/>По умолчанию<code>1</code> - есть на складе');
         //$attributes['created_at'] = Yii::t('app/default', 'Дата создания');
         // $attributes['updated_at'] = Yii::t('app/default', 'Дата обновления');
-        foreach (Attribute::find()->joinWith(['translations'])->asArray()->all() as $attr) {
-            $attributes[$eav_prefix . $attr['name']] = $attr['translations'][0]['title'];
+        foreach (Attribute::find()->asArray()->all() as $attr) {
+            $attributes[$eav_prefix . $attr['id']] = $attr['title'];
         }
         return $attributes;
     }

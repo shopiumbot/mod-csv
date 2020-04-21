@@ -129,8 +129,7 @@ class CsvAttributesProcessor extends Component
 
 
         $query->where(['attribute_id' => $attribute->id]);
-        $query->joinWith(['translations translate']);
-        $query->andWhere(['translate.value' => $val]);
+        $query->andWhere(['value' => $val]);
 
 
         $option = $query->one();
