@@ -12,7 +12,7 @@ use panix\engine\CMS;
 use panix\engine\controllers\AdminController;
 use shopium\mod\csv\components\CsvExporter;
 use shopium\mod\csv\components\CsvImporter;
-use core\mod\shop\models\Product;
+use core\modules\shop\models\Product;
 use shopium\mod\csv\models\FilterForm;
 use shopium\mod\csv\models\ImportForm;
 

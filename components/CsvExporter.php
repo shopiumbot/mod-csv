@@ -52,7 +52,7 @@ class CsvExporter
 
     /**
      * @param array $attributes
-     * @param $query \core\mod\shop\models\query\ProductQuery
+     * @param $query \core\modules\shop\models\query\ProductQuery
      */
     public function export(array $attributes, $query)
     {
