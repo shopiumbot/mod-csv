@@ -1,6 +1,6 @@
 <?php
 
-namespace panix\mod\csv\controllers\admin;
+namespace shopium\mod\csv\controllers\admin;
 
 use Yii;
 use yii\data\ArrayDataProvider;
@@ -10,11 +10,11 @@ use yii\web\UploadedFile;
 use panix\engine\Html;
 use panix\engine\CMS;
 use panix\engine\controllers\AdminController;
-use panix\mod\csv\components\CsvExporter;
-use panix\mod\csv\components\CsvImporter;
+use shopium\mod\csv\components\CsvExporter;
+use shopium\mod\csv\components\CsvImporter;
 use panix\mod\shop\models\Product;
-use panix\mod\csv\models\FilterForm;
-use panix\mod\csv\models\ImportForm;
+use shopium\mod\csv\models\FilterForm;
+use shopium\mod\csv\models\ImportForm;
 
 ignore_user_abort(1);
 set_time_limit(0);

@@ -1,12 +1,12 @@
 {
-  "name": "panix/mod-csv",
+  "name": "shopium/mod-csv",
   "description": "Module csv",
   "keywords": [
     "pixelion-cms",
     "module",
     "csv"
   ],
-  "homepage": "https://github.com/andrtechno/mod-csv",
+  "homepage": "https://github.com/shopium/mod-csv",
   "type": "yii2-extension",
   "license": "MIT",
   "minimum-stability": "dev",
@@ -18,12 +18,11 @@
     }
   ],
   "require": {
-    "panix/mod-shop": "dev-master",
     "nelexa/zip": "~3"
   },
   "autoload": {
     "psr-4": {
-      "panix\\mod\\csv\\": ""
+      "shopium\\mod\\csv\\": ""
     }
   }
 }

@@ -8,7 +8,7 @@ use panix\engine\bootstrap\ActiveForm;
 /**
  * @var $pages \panix\engine\data\Pagination
  * @var $query \panix\mod\shop\models\query\ProductQuery
- * @var $importer \panix\mod\csv\components\CsvImporter
+ * @var $importer \shopium\mod\csv\components\CsvImporter
  */
 
 $this->registerJs('
@@ -84,7 +84,7 @@ $this->registerJs('
                         <th colspan="3" class="text-center"><?= $groupName; ?></th>
                     </tr>
                     <?php foreach ($group as $k => $v) {
-                        $dis = (in_array($k, (new \panix\mod\csv\components\CsvImporter)->required)) ? true : false;
+                        $dis = (in_array($k, (new \shopium\mod\csv\components\CsvImporter)->required)) ? true : false;
                         //,'readonly'=>$dis,'disabled'=>$dis
                         ?>
                         <tr>

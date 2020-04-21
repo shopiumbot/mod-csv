@@ -1,6 +1,6 @@
 <?php
 
-namespace panix\mod\csv\components;
+namespace shopium\mod\csv\components;
 
 use Yii;
 use yii\helpers\FileHelper;

@@ -1,6 +1,6 @@
 <?php
 
-namespace panix\mod\csv\components;
+namespace shopium\mod\csv\components;
 
 use panix\mod\images\behaviors\ImageBehavior;
 use panix\mod\images\models\Image;

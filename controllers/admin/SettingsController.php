@@ -1,9 +1,9 @@
 <?php
 
-namespace panix\mod\csv\controllers\admin;
+namespace shopium\mod\csv\controllers\admin;
 
 use Yii;
-use panix\mod\csv\models\SettingsForm;
+use shopium\mod\csv\models\SettingsForm;
 use panix\engine\controllers\AdminController;
 
 class SettingsController extends AdminController

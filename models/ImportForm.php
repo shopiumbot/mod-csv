@@ -1,8 +1,8 @@
 <?php
 
-namespace panix\mod\csv\models;
+namespace shopium\mod\csv\models;
 
-use panix\mod\csv\components\CsvImporter;
+use shopium\mod\csv\components\CsvImporter;
 use Yii;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
@@ -11,7 +11,7 @@ use yii\helpers\ArrayHelper;
  * Class FilterForm
  * @property string $file_csv
  * @property string $files
- * @package panix\mod\csv\models
+ * @package shopium\mod\csv\models
  */
 class ImportForm extends Model
 {
