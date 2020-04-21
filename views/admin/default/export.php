@@ -1,13 +1,13 @@
 <?php
 use panix\engine\Html;
-use panix\mod\shop\models\Manufacturer;
-use panix\mod\shop\models\ProductType;
+use core\mod\shop\models\Manufacturer;
+use core\mod\shop\models\ProductType;
 use yii\helpers\ArrayHelper;
 use panix\engine\bootstrap\ActiveForm;
 
 /**
  * @var $pages \panix\engine\data\Pagination
- * @var $query \panix\mod\shop\models\query\ProductQuery
+ * @var $query \core\mod\shop\models\query\ProductQuery
  * @var $importer \shopium\mod\csv\components\CsvImporter
  */
 

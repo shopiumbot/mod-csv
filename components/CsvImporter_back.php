@@ -4,17 +4,17 @@ namespace shopium\mod\csv\components;
 
 use panix\mod\images\behaviors\ImageBehavior;
 use panix\mod\images\models\Image;
-use panix\mod\shop\models\Currency;
-use panix\mod\shop\models\Supplier;
+use core\mod\shop\models\Currency;
+use core\mod\shop\models\Supplier;
 use Yii;
 use panix\engine\CMS;
 use panix\engine\Html;
-use panix\mod\shop\models\Manufacturer;
-use panix\mod\shop\models\ProductType;
-use panix\mod\shop\models\translate\CategoryTranslate;
-use panix\mod\shop\models\Attribute;
-use panix\mod\shop\models\Category;
-use panix\mod\shop\models\Product;
+use core\mod\shop\models\Manufacturer;
+use core\mod\shop\models\ProductType;
+use core\mod\shop\models\translate\CategoryTranslate;
+use core\mod\shop\models\Attribute;
+use core\mod\shop\models\Category;
+use core\mod\shop\models\Product;
 use yii\base\Exception;
 use yii\helpers\VarDumper;
 

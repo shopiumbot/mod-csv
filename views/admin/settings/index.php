@@ -2,7 +2,7 @@
 
 use panix\engine\Html;
 use panix\engine\bootstrap\ActiveForm;
-use panix\mod\shop\models\ProductType;
+use core\mod\shop\models\ProductType;
 use yii\helpers\ArrayHelper;
 
 /**
