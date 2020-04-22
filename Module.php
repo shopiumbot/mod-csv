@@ -20,9 +20,8 @@ class Module extends WebModule
                         'items' => [
                             [
                                 'label' => Yii::t('csv/default', 'MODULE_NAME'),
-                                'url' => ['/admin/csv'],
+                                'url' => ['/admin/csv/default/import'],
                                 'icon' => $this->icon,
-                                // 'active' => $this->getIsActive('csv/default'),
                             ],
                         ]
                     ]

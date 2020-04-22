@@ -69,8 +69,7 @@ class CsvExporter
                     $value = $this->getCategory($p);
                 } elseif ($attr === 'Бренд') {
                     $value = $this->getManufacturer($p);
-                } elseif ($attr === 'currency') {
-                    $value = $this->getCurrency($p);
+
                 } elseif ($attr === 'Фото') {
                     /** @var \panix\mod\images\behaviors\ImageBehavior $img  */
                     $img = $p->getImage();
@@ -79,6 +78,14 @@ class CsvExporter
                     $value = $this->getAdditionalCategories($p);
                 } elseif ($attr === 'Тип') {
                     $value = $p->type->name;
+                } elseif ($attr === 'Наименование') {
+                    $value = $p->name;
+                } elseif ($attr === 'Цена') {
+                    $value = $p->price;
+                } elseif ($attr === 'currency') {
+                    $value = $this->getCurrency($p);
+                } elseif ($attr === 'Артикул') {
+                    $value = $p->sku;
                 } elseif ($attr === 'unit') {
                     if (isset($p->units)) {
                         $value = (isset($p->units[$p->$attr])) ? $p->units[$p->$attr] : NULL;

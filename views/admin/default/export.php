@@ -20,7 +20,7 @@ $this->registerJs('
 
         delete fields["attributes[]"];
         
-        window.location = common.url("/admin/csv/default/export?" + jQuery.param($.extend({}, fields)));
+        window.location = "/admin/csv/default/export?" + jQuery.param($.extend({}, fields));
     });
 ');
 
