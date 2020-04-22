@@ -203,7 +203,7 @@ class CsvImporter_back extends \yii\base\Component
         //if (isset($data['sku']) && !empty($data['sku']) && $data['sku'] != '') {
         //   $query->where([Product::tableName() . '.sku' => $data['sku']]);
         // } else {
-        $query->where(['name' => $data['name']]); //$cr->compare('translate.name', $data['name']);
+        $query->where(['name' => $data['Наименование']]); //$cr->compare('translate.name', $data['name']);
         // }
 
         $query->applyCategories($category_id);

@@ -30,7 +30,7 @@ class CsvAttributesProcessor extends Component
     /**
      * @var array
      */
-    public $skipNames = ['category', 'type', 'manufacturer', 'supplier', 'currency', 'image', 'additionalCategories', 'wholesale_prices', 'unit'];
+    public $skipNames = ['Наименование', 'Артикул','Категория', 'Тип', 'Цена','Бренд', 'currency', 'Фото', 'additionalCategories', 'wholesale_prices', 'unit'];
 
     /**
      * @var array Attribute models.
@@ -175,9 +175,7 @@ class CsvAttributesProcessor extends Component
             // Create new attribute
             $attribute = new Attribute;
             $attribute->title = ucfirst(str_replace('_', ' ', $name));
-            $attribute->name = CMS::slug($attribute->title);
             $attribute->type = Attribute::TYPE_DROPDOWN;
-            $attribute->display_on_front = true;
             $attribute->save(false);
 
             // Add to type

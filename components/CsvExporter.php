@@ -43,11 +43,6 @@ class CsvExporter
     /**
      * @var array
      */
-    public $supplierCache = [];
-
-    /**
-     * @var array
-     */
     public $currencyCache = [];
 
     /**
@@ -70,50 +65,26 @@ class CsvExporter
             $row = [];
 
             foreach ($attributes as $attr) {
-                if ($attr === 'category') {
+                if ($attr === 'Категория') {
                     $value = $this->getCategory($p);
-                } elseif ($attr === 'manufacturer') {
+                } elseif ($attr === 'Бренд') {
                     $value = $this->getManufacturer($p);
-                } elseif ($attr === 'supplier') {
-                    $value = $this->getSupplier($p);
                 } elseif ($attr === 'currency') {
                     $value = $this->getCurrency($p);
-                } elseif ($attr === 'image') {
+                } elseif ($attr === 'Фото') {
                     /** @var \panix\mod\images\behaviors\ImageBehavior $img  */
                     $img = $p->getImage();
                     $value = ($img) ? $img->filePath : NULL;
                 } elseif ($attr === 'additionalCategories') {
                     $value = $this->getAdditionalCategories($p);
-                } elseif ($attr === 'type') {
+                } elseif ($attr === 'Тип') {
                     $value = $p->type->name;
-
-                } elseif ($attr === 'wholesale_prices') {
-                    $price = [];
-                    $result = NULL;
-                    if (isset($p->prices)) {
-                        foreach ($p->prices as $wp) {
-                            $price[] = $wp->value . '=' . $wp->from;
-                        }
-                       $result = implode(';', $price);
-                    }
-                    $value = $result;
-
                 } elseif ($attr === 'unit') {
                     if (isset($p->units)) {
                         $value = (isset($p->units[$p->$attr])) ? $p->units[$p->$attr] : NULL;
                     } else {
                         $value = NULL;
                     }
-
-                } elseif ($attr === 'full_description') {
-                    if (isset($p->$attr)) {
-                        $value = <<<EOF
-{$p->$attr}
-EOF;
-                    }else{
-                        $value=NULL;
-                    }
-
                 } else {
 
                     $value = (isset($p->$attr)) ? $p->$attr : NULL;
@@ -221,23 +192,6 @@ EOF;
 
         $product->currency ? $result = $product->currency->iso : $result = '';
         $this->currencyCache[$product->currency_id] = $result;
-        return $result;
-    }
-
-    /**
-     * Get supplier
-     *
-     * @param Product $product
-     * @return mixed|string
-     */
-    public function getSupplier(Product $product)
-    {
-        if (isset($this->supplierCache[$product->supplier_id]))
-            return $this->supplierCache[$product->supplier_id];
-
-        $product->supplier ? $result = $product->supplier->name : $result = '';
-        $this->supplierCache[$product->supplier_id] = $result;
-
         return $result;
     }
 

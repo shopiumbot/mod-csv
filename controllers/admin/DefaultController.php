@@ -228,7 +228,7 @@ class DefaultController extends AdminController
         // $response->getHeaders()->add('Content-Disposition', 'attachment; filename=sample.csv');
 
         $content = '"name";"category";"price";"type"' . PHP_EOL;
-        $content .= '"Product Name";"Category/Subcategory";"10.99";"Base Product"' . PHP_EOL;
+        $content .= '"Product Name";"Category/Subcategory";"10.99";"Product name"' . PHP_EOL;
 
 
         return \Yii::$app->response->sendContentAsFile($content, 'sample.csv', [

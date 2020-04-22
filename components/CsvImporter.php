@@ -117,7 +117,7 @@ class CsvImporter extends Component
         'deleted' => 0
     ];
     public static $extension = ['jpg', 'jpeg'];
-    public $required = ['category', 'price', 'sku', 'type'];
+    public $required = ['Категория', 'Цена', 'Артикул', 'Тип'];
 
 
     /**
@@ -180,12 +180,12 @@ class CsvImporter extends Component
     protected function importRow($data)
     {
 
-        if (!isset($data['category']) || empty($data['category']))
-            $data['category'] = 'root';
+        if (!isset($data['Категория']) || empty($data['Категория']))
+            $data['Категория'] = 'root';
 
         $newProduct = false;
 
-        $category_id = $this->getCategoryByPath($data['category']);
+        $category_id = $this->getCategoryByPath($data['Категория']);
 
         $query = Product::find();
 
@@ -194,7 +194,7 @@ class CsvImporter extends Component
         //if (isset($data['sku']) && !empty($data['sku']) && $data['sku'] != '') {
         //   $query->where([Product::tableName() . '.sku' => $data['sku']]);
         // } else {
-        $query->where(['name' => $data['name']]); //$cr->compare('translate.name', $data['name']);
+        $query->where(['name' => $data['Наименование']]); //$cr->compare('translate.name', $data['name']);
         // }
 
         $query->applyCategories($category_id);
@@ -212,111 +212,96 @@ class CsvImporter extends Component
                 $this->stats['deleted']++;
                 $hasDeleted = true;
                 $model->delete();
-                $this->externalFinder->removeObject(ExternalFinder::OBJECT_PRODUCT, $data['fleshka_id']);
             }
 
         }
         if (!$hasDeleted) {
-        // Process product type
-        $config = Yii::$app->settings->get('csv');
-        $model->type_id = $this->getTypeIdByName($data['type']);
-        $model->main_category_id = $category_id;
-        $model->switch = isset($data['switch']) ? $data['switch'] : 1;
+            // Process product type
+            $config = Yii::$app->settings->get('csv');
+            $model->type_id = $this->getTypeIdByName($data['Тип']);
+            $model->main_category_id = $category_id;
+            $model->switch = isset($data['switch']) ? $data['switch'] : 1;
+            $model->price = $data['Цена'];
+            $model->name = $data['Наименование'];
 
-        if (isset($data['unit']) && !empty($data['unit']) && array_search(trim($data['unit']), $model->getUnits())) {
-            $model->unit = array_search(trim($data['unit']), $model->getUnits());
-        }else{
-            $model->unit=1;
-        }
-
-        // $model->price = $pricesList[0];
-
-        // Manufacturer
-        if (isset($data['manufacturer']) && !empty($data['manufacturer']))
-            $model->manufacturer_id = $this->getManufacturerIdByName($data['manufacturer']);
-
-        // Supplier
-        if (isset($data['supplier']) && !empty($data['supplier']))
-            $model->supplier_id = $this->getSupplierIdByName($data['supplier']);
-
-        // Currency
-        if (isset($data['currency']) && !empty($data['currency']))
-            $model->currency_id = $this->getCurrencyIdByName($data['currency']);
-
-
-        // Update product variables and eav attributes.
-        $attributes = new CsvAttributesProcessor($model, $data);
-
-        if ($model->validate()) {
-
-            $categories = [$category_id];
-
-            if (isset($data['additionalCategories']))
-                $categories = array_merge($categories, $this->getAdditionalCategories($data['additionalCategories']));
-
-            //if (!$newProduct) {
-            foreach ($model->categorization as $c)
-                $categories[] = $c->category;
-            $categories = array_unique($categories);
-            //}
-
-
-            // Save product
-            $model->save();
-
-
-            // Set prices
-            if (isset($data['wholesale_prices']) && !empty($data['wholesale_prices'])) {
-                $pricesList = explode(';', $data['wholesale_prices']);
-                $p = [];
-                foreach ($pricesList as $n => $price) {
-                    if (!empty($price)) {
-                        list($priceValue, $num) = explode('=', $price);
-                        $p[] = ['from' => $num, 'value' => $priceValue];
-                    }
-                }
-                $model->processPrices($p);
-
+            if (isset($data['unit']) && !empty($data['unit']) && array_search(trim($data['unit']), $model->getUnits())) {
+                $model->unit = array_search(trim($data['unit']), $model->getUnits());
+            } else {
+                $model->unit = 1;
             }
-            // Update EAV data
-            $attributes->save();
 
-            // Update categories
-            $model->setCategories($categories, $category_id);
+            // $model->price = $pricesList[0];
 
-            if (isset($data['image']) && !empty($data['image'])) {
-                if ($this->validateImage($data['image'])) {
-                    /** @var ImageBehavior $model */
-                    $imagesArray = explode(';', $data['image']);
-                    foreach ($imagesArray as $n => $im) {
-                        $image = CsvImage::create($im);
-                        if ($image) {
-                            $model->attachImage($image);
-                            if ($this->deleteDownloadedImages) {
-                                $image->deleteTempFile();
+            // Manufacturer
+            if (isset($data['Бренд']) && !empty($data['Бренд']))
+                $model->manufacturer_id = $this->getManufacturerIdByName($data['Бренд']);
+
+
+            // Currency
+            if (isset($data['currency']) && !empty($data['currency']))
+                $model->currency_id = $this->getCurrencyIdByName($data['currency']);
+
+
+            // Update product variables and eav attributes.
+            $attributes = new CsvAttributesProcessor($model, $data);
+
+            if ($model->validate()) {
+
+                $categories = [$category_id];
+
+                if (isset($data['additionalCategories']))
+                    $categories = array_merge($categories, $this->getAdditionalCategories($data['additionalCategories']));
+
+                //if (!$newProduct) {
+                foreach ($model->categorization as $c)
+                    $categories[] = $c->category;
+                $categories = array_unique($categories);
+                //}
+
+
+                // Save product
+                $model->save();
+
+
+                // Update EAV data
+                $attributes->save();
+
+                // Update categories
+                $model->setCategories($categories, $category_id);
+
+                if (isset($data['Фото']) && !empty($data['Фото'])) {
+                    if ($this->validateImage($data['Фото'])) {
+                        /** @var ImageBehavior $model */
+                        $imagesArray = explode(';', $data['Фото']);
+                        foreach ($imagesArray as $n => $im) {
+                            $image = CsvImage::create($im);
+                            if ($image) {
+                                $model->attachImage($image);
+                                if ($this->deleteDownloadedImages) {
+                                    $image->deleteTempFile();
+                                }
                             }
-                        }
 
-                    }
-                }else{
+                        }
+                    } else {
                         $this->errors[] = [
                             'line' => $this->line,
                             'error' => 'error image'
                         ];
+                    }
+
                 }
-				
+
+            } else {
+                $errors = $model->getErrors();
+
+                $error = array_shift($errors);
+                $this->errors[] = [
+                    'line' => $this->line,
+                    'error' => $error[0]
+                ];
             }
-
-        } else {
-            $errors = $model->getErrors();
-
-            $error = array_shift($errors);
-            $this->errors[] = [
-                'line' => $this->line,
-                'error' => $error[0]
-            ];
         }
-		}
     }
 
     /**
@@ -380,7 +365,6 @@ class CsvImporter extends Component
         if (!$model) {
             $model = new Manufacturer();
             $model->name = trim($name);
-            $model->slug = CMS::slug($model->name);
             $model->save();
         }
 
@@ -401,36 +385,14 @@ class CsvImporter extends Component
         $query = Currency::find()->where(['iso' => trim($name)]);
         /** @var Currency $model */
         $model = $query->one();
-		
+
         if (!$model)
-            throw new Exception(Yii::t('csv/default','NO_FIND_CURRENCY',$name));
+            throw new Exception(Yii::t('csv/default', 'NO_FIND_CURRENCY', $name));
 
         $this->currencyCache[$name] = $model->id;
         return $model->id;
     }
 
-    /**
-     * Find or create supplier
-     * @param string $name
-     * @return integer
-     */
-    public function getSupplierIdByName($name)
-    {
-        if (isset($this->supplierCache[$name]))
-            return $this->supplierCache[$name];
-
-        $query = Supplier::find()->where(['name' => trim($name)]);
-
-        $model = $query->one();
-        if (!$model) {
-            $model = new Supplier();
-            $model->name = $name;
-            $model->save(false);
-        }
-
-        $this->supplierCache[$name] = $model->id;
-        return $model->id;
-    }
 
     /**
      * Get product type by name. If type not exists - create new one.
@@ -483,7 +445,6 @@ class CsvImporter extends Component
         if (!$model) {
             $model = new Category;
             $model->name = trim($result[0]);
-            $model->slug = CMS::slug($model->name);
             $model->appendTo($parent);
         }
         $first_model = $model;
@@ -498,7 +459,6 @@ class CsvImporter extends Component
             if (!$model) {
                 $model = new Category;
                 $model->name = $name;
-                $model->slug = CMS::slug($model->name);
                 $model->appendTo($parent);
             }
 
@@ -578,22 +538,21 @@ class CsvImporter extends Component
             $units .= '<code style="font-size: inherit">' . $unit . '</code><br/>';
         }
         $shop_config = Yii::$app->settings->get('shop');
-        $attributes['type'] = Yii::t('shop/Product', 'TYPE_ID');
+        $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
 
         //if (!$shop_config['auto_gen_url']) {
-        $attributes['name'] = Yii::t('shop/Product', 'NAME');
+        $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
         // }
         $attributes['currency'] = Yii::t('shop/Product', 'CURRENCY_ID');
-        $attributes['category'] = Yii::t('app/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
+        $attributes['Категория'] = Yii::t('app/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
         $attributes['additionalCategories'] = Yii::t('app/default', 'Доп. Категории разделяются точкой с запятой <code>;</code>. На пример <code>MyCategory;MyCategory/MyCategorySub</code>.');
-        $attributes['manufacturer'] = Yii::t('app/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
-        $attributes['supplier'] = Yii::t('shop/Product', 'SUPPLIER_ID');
-        $attributes['sku'] = Yii::t('shop/Product', 'SKU');
-        $attributes['price'] = Yii::t('shop/Product', 'PRICE');
+        $attributes['Бренд'] = Yii::t('app/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
+        $attributes['Артикул'] = Yii::t('shop/Product', 'SKU');
+        $attributes['Цена'] = Yii::t('shop/Product', 'PRICE');
         $attributes['wholesale_prices'] = Yii::t('csv/default', 'WHOLESALE_PRICE');
         $attributes['unit'] = Yii::t('shop/Product', 'UNIT') . '<br/>' . $units;
         $attributes['switch'] = Yii::t('app/default', 'Скрыть или показать. Принимает значение <code>1</code> - показать <code>0</code> - скрыть.');
-        $attributes['image'] = Yii::t('app/default', 'Изображение (можно указать несколько изображений). Пример: <code>pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code>;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
+        $attributes['Фото'] = Yii::t('app/default', 'Изображение (можно указать несколько изображений). Пример: <code>pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code>;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
         $attributes['full_description'] = Yii::t('app/default', 'Полное описание HTML');
         $attributes['quantity'] = Yii::t('app/default', 'Количество на складе.<br/>По умолчанию <code>1</code>, от 0 до 99999');
         $attributes['availability'] = Yii::t('app/default', 'Доступность. Принимает значение <code>1</code> - есть на складе, <code>2</code> - нет на складе, <code>3</code> - под заказ.<br/>По умолчанию<code>1</code> - есть на складе');
@@ -615,25 +574,23 @@ class CsvImporter extends Component
         $attributes = [];
         $shop_config = Yii::$app->settings->get('shop');
         if (!Yii::$app->settings->get('csv', 'use_type')) {
-            $attributes['type'] = Yii::t('shop/Product', 'TYPE_ID');
+            $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
         }
         //if (!$shop_config['auto_gen_url']) {
-        $attributes['name'] = Yii::t('shop/Product', 'NAME');
+        $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
         // }
         $attributes['currency'] = Yii::t('shop/Product', 'CURRENCY_ID');
-        $attributes['category'] = Yii::t('app/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
+        $attributes['Категория'] = Yii::t('app/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
         $attributes['additionalCategories'] = Yii::t('app/default', 'Доп. Категории разделяются точкой с запятой <code style="font-size: inherit">;</code><br/>Например &mdash; <code style="font-size: inherit">MyCategory;MyCategory/MyCategorySub</code>.');
-        $attributes['manufacturer'] = Yii::t('app/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
-        $attributes['supplier'] = Yii::t('shop/Product', 'SUPPLIER_ID');
-        $attributes['sku'] = Yii::t('shop/Product', 'SKU');
-        $attributes['price'] = Yii::t('shop/Product', 'PRICE');
+        $attributes['Бренд'] = Yii::t('app/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
+        $attributes['Артикул'] = Yii::t('shop/Product', 'SKU');
+        $attributes['Цена'] = Yii::t('shop/Product', 'PRICE');
         $attributes['wholesale_prices'] = Yii::t('csv/default', 'WHOLESALE_PRICE');
 
 
         $attributes['unit'] = Yii::t('shop/Product', 'UNIT') . '<br/>' . $units;
         $attributes['switch'] = Yii::t('app/default', 'Скрыть или показать. Принимает значение<br/><code style="font-size: inherit">1</code> &mdash; показать<br/><code style="font-size: inherit">0</code> &mdash; скрыть');
-        $attributes['image'] = Yii::t('app/default', 'Изображение (можно указать несколько изображений). Пример: <code style="font-size: inherit">pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code style="font-size: inherit">;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
-        $attributes['full_description'] = Yii::t('app/default', 'Полное описание HTML');
+        $attributes['Фото'] = Yii::t('app/default', 'Изображение (можно указать несколько изображений). Пример: <code style="font-size: inherit">pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code style="font-size: inherit">;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
         $attributes['quantity'] = Yii::t('app/default', 'Количество на складе.<br/>По умолчанию &mdash; <code style="font-size: inherit">1</code>, от 0 до 99999');
         $attributes['availability'] = Yii::t('app/default', 'Наличие.<br/>Принимает значение<br/><code style="font-size: inherit">1</code> &mdash; есть на складе <strong>(default)</strong><br/><code style="font-size: inherit">2</code> &mdash; нет на складе<br/><code style="font-size: inherit">3</code> &mdash; под заказ.');
         //$attributes['created_at'] = Yii::t('app/default', 'Дата создания');
@@ -641,11 +598,11 @@ class CsvImporter extends Component
         if ($type_id) {
             $type = ProductType::findOne($type_id);
             foreach ($type->shopAttributes as $attr) {
-                $attributes[$eav_prefix . $attr->name] = $attr->title;
+                $attributes[$attr->title] = $attr->title;
             }
         } else {
             foreach (Attribute::find()->asArray()->all() as $attr) {
-                $attributes[$eav_prefix . $attr['id']] = $attr['title'];
+                $attributes[$attr['title']] = $attr['title'];
             }
         }
 
