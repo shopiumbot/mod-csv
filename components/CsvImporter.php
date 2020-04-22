@@ -238,8 +238,8 @@ class CsvImporter extends Component
 
 
             // Currency
-            if (isset($data['currency']) && !empty($data['currency']))
-                $model->currency_id = $this->getCurrencyIdByName($data['currency']);
+            if (isset($data['Валюта']) && !empty($data['Валюта']))
+                $model->currency_id = $this->getCurrencyIdByName($data['Валюта']);
 
 
             // Update product variables and eav attributes.
@@ -539,15 +539,12 @@ class CsvImporter extends Component
         }
         $shop_config = Yii::$app->settings->get('shop');
         $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
-
-        //if (!$shop_config['auto_gen_url']) {
         $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
-        // }
-        $attributes['currency'] = Yii::t('shop/Product', 'CURRENCY_ID');
         $attributes['Категория'] = Yii::t('app/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
         $attributes['additionalCategories'] = Yii::t('app/default', 'Доп. Категории разделяются точкой с запятой <code>;</code>. На пример <code>MyCategory;MyCategory/MyCategorySub</code>.');
         $attributes['Бренд'] = Yii::t('app/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
         $attributes['Артикул'] = Yii::t('shop/Product', 'SKU');
+        $attributes['Валюта'] = Yii::t('shop/Product', 'CURRENCY_ID');
         $attributes['Цена'] = Yii::t('shop/Product', 'PRICE');
         $attributes['wholesale_prices'] = Yii::t('csv/default', 'WHOLESALE_PRICE');
         $attributes['unit'] = Yii::t('shop/Product', 'UNIT') . '<br/>' . $units;
@@ -559,7 +556,7 @@ class CsvImporter extends Component
         //$attributes['created_at'] = Yii::t('app/default', 'Дата создания');
         // $attributes['updated_at'] = Yii::t('app/default', 'Дата обновления');
         foreach (Attribute::find()->asArray()->all() as $attr) {
-            $attributes[$eav_prefix . $attr['id']] = $attr['title'];
+            $attributes[$eav_prefix . $attr['title']] = $attr['title'];
         }
         return $attributes;
     }
@@ -579,15 +576,14 @@ class CsvImporter extends Component
         //if (!$shop_config['auto_gen_url']) {
         $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
         // }
-        $attributes['currency'] = Yii::t('shop/Product', 'CURRENCY_ID');
+
         $attributes['Категория'] = Yii::t('app/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
         $attributes['additionalCategories'] = Yii::t('app/default', 'Доп. Категории разделяются точкой с запятой <code style="font-size: inherit">;</code><br/>Например &mdash; <code style="font-size: inherit">MyCategory;MyCategory/MyCategorySub</code>.');
         $attributes['Бренд'] = Yii::t('app/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
         $attributes['Артикул'] = Yii::t('shop/Product', 'SKU');
+        $attributes['Валюта'] = Yii::t('shop/Product', 'CURRENCY_ID');
         $attributes['Цена'] = Yii::t('shop/Product', 'PRICE');
         $attributes['wholesale_prices'] = Yii::t('csv/default', 'WHOLESALE_PRICE');
-
-
         $attributes['unit'] = Yii::t('shop/Product', 'UNIT') . '<br/>' . $units;
         $attributes['switch'] = Yii::t('app/default', 'Скрыть или показать. Принимает значение<br/><code style="font-size: inherit">1</code> &mdash; показать<br/><code style="font-size: inherit">0</code> &mdash; скрыть');
         $attributes['Фото'] = Yii::t('app/default', 'Изображение (можно указать несколько изображений). Пример: <code style="font-size: inherit">pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code style="font-size: inherit">;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');

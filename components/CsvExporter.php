@@ -59,7 +59,6 @@ class CsvExporter
         }*/
 
 
-
         /** @var Product $p */
         foreach ($query->all() as $p) {
             $row = [];
@@ -71,7 +70,7 @@ class CsvExporter
                     $value = $this->getManufacturer($p);
 
                 } elseif ($attr === 'Фото') {
-                    /** @var \panix\mod\images\behaviors\ImageBehavior $img  */
+                    /** @var \panix\mod\images\behaviors\ImageBehavior $img */
                     $img = $p->getImage();
                     $value = ($img) ? $img->filePath : NULL;
                 } elseif ($attr === 'additionalCategories') {
@@ -82,10 +81,21 @@ class CsvExporter
                     $value = $p->name;
                 } elseif ($attr === 'Цена') {
                     $value = $p->price;
-                } elseif ($attr === 'currency') {
+                } elseif ($attr === 'Валюта') {
                     $value = $this->getCurrency($p);
                 } elseif ($attr === 'Артикул') {
                     $value = $p->sku;
+                } elseif ($attr === 'wholesale_prices') {
+                    $price = [];
+                    $result = NULL;
+                    if (isset($p->prices)) {
+                        foreach ($p->prices as $wp) {
+                            $price[] = $wp->value . '=' . $wp->from;
+                        }
+                        $result = implode(';', $price);
+                    }
+                    $value = $result;
+
                 } elseif ($attr === 'unit') {
                     if (isset($p->units)) {
                         $value = (isset($p->units[$p->$attr])) ? $p->units[$p->$attr] : NULL;
@@ -93,6 +103,11 @@ class CsvExporter
                         $value = NULL;
                     }
                 } else {
+                    $name = 'Тип оперативной памяти';
+                    print_r($p->eav_{$name});
+
+                    echo 'zzz';
+                    die;
 
                     $value = (isset($p->$attr)) ? $p->$attr : NULL;
 

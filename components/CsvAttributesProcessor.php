@@ -30,7 +30,7 @@ class CsvAttributesProcessor extends Component
     /**
      * @var array
      */
-    public $skipNames = ['Наименование', 'Артикул','Категория', 'Тип', 'Цена','Бренд', 'currency', 'Фото', 'additionalCategories', 'wholesale_prices', 'unit'];
+    public $skipNames = ['Наименование', 'Артикул', 'Категория', 'Тип', 'Цена', 'Бренд', 'Валюта', 'Фото', 'additionalCategories', 'wholesale_prices', 'unit'];
 
     /**
      * @var array Attribute models.
@@ -81,6 +81,7 @@ class CsvAttributesProcessor extends Component
                 }
             }
         }
+        print_r($this->data);die;
     }
 
     /**
