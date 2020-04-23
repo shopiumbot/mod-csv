@@ -30,7 +30,23 @@ class CsvAttributesProcessor extends Component
     /**
      * @var array
      */
-    public $skipNames = ['Наименование', 'Артикул', 'Категория', 'Тип', 'Цена', 'Бренд', 'Валюта', 'Фото', 'additionalCategories', 'wholesale_prices', 'unit'];
+    public $skipNames = [
+        'Наименование',
+        'Артикул',
+        'Категория',
+        'Тип',
+        'Цена',
+        'Бренд',
+        'Валюта',
+        'Фото',
+        'additionalCategories',
+        'wholesale_prices',
+        'unit',
+        'availability',
+        'switch',
+        'quantity',
+        'currency'
+    ];
 
     /**
      * @var array Attribute models.
@@ -65,23 +81,29 @@ class CsvAttributesProcessor extends Component
      */
     public function process()
     {
+
         foreach ($this->data as $key => $val) {
             try {
                 if (!in_array($key, $this->skipNames) && !empty($val)) {
                     $this->model->$key = $val;
+
                 }
+
             } catch (Exception $e) {
                 // Process eav
                 if (!in_array($key, $this->skipNames) && !empty($val)) {
 
-                    if (substr($key, 0, 4) === 'eav_')
-                        $key = substr($key, 4);
+                    //if (substr($key, 0, 4) === 'eav_')
+                    //    $key = substr($key, 4);
+
+
+                    $key = CMS::slug($key);
 
                     $this->eav[$key] = $this->processEavData($key, $val);
                 }
             }
         }
-        print_r($this->data);die;
+
     }
 
     /**
@@ -176,6 +198,7 @@ class CsvAttributesProcessor extends Component
             // Create new attribute
             $attribute = new Attribute;
             $attribute->title = ucfirst(str_replace('_', ' ', $name));
+            $attribute->name = CMS::slug($attribute->title);
             $attribute->type = Attribute::TYPE_DROPDOWN;
             $attribute->save(false);
 
@@ -196,6 +219,8 @@ class CsvAttributesProcessor extends Component
      */
     public function save()
     {
+
+
         if (!empty($this->eav))
             $this->model->setEavAttributes($this->eav, true);
     }

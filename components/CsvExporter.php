@@ -103,13 +103,8 @@ class CsvExporter
                         $value = NULL;
                     }
                 } else {
-                    $name = 'Тип оперативной памяти';
-                    print_r($p->eav_{$name});
-
-                    echo 'zzz';
-                    die;
-
-                    $value = (isset($p->$attr)) ? $p->$attr : NULL;
+                    $name = CMS::slug($attr);
+                    $value = $p->{'eav_' . $name}['value'];
 
                 }
 
