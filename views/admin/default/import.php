@@ -153,7 +153,7 @@ use panix\engine\CMS;
                 $groups = [];
 
 
-                foreach ($importer->getImportableAttributes('eav_') as $k => $v) {
+                foreach ($importer->getImportableAttributes() as $k => $v) {
                     if (strpos($k, 'eav_') === false) {
                         $groups['Основные'][$k] = $v;
                     } else {
