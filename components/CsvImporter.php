@@ -25,7 +25,7 @@ class CsvImporter extends Component
     /**
      * @var string column delimiter
      */
-    public $delimiter = ";";
+    public $delimiter = ",";
 
     /**
      * @var int
@@ -145,7 +145,8 @@ class CsvImporter extends Component
         $line = fgets($file);
         $this->csv_columns = str_getcsv($line, $this->delimiter, $this->enclosure);
 
-        foreach ($this->required as $column) { //'name', 'type', 
+        foreach ($this->required as $column) { //'name', 'type',
+
             if (!in_array($column, $this->csv_columns))
                 $this->errors[] = [
                     'line' => 0,
