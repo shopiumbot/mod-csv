@@ -153,7 +153,7 @@ use panix\engine\CMS;
                 $groups = [];
 
 
-                foreach ($importer->getImportableAttributes() as $k => $v) {
+                foreach ($importer->getImportableAttributes('eav_') as $k => $v) {
                     if (strpos($k, 'eav_') === false) {
                         $groups['Основные'][$k] = $v;
                     } else {
@@ -178,7 +178,7 @@ use panix\engine\CMS;
                             $value = in_array($k, $importer->required) ? $k . ' <span class="required">*</span>' : $k;
                             ?>
                             <tr>
-                                <td width="200px"><code style="font-size: inherit"><?= $value; ?></code></td>
+                                <td width="200px"><code style="font-size: inherit"><?= str_replace('eav_','',$value); ?></code></td>
                                 <td><?= $v; ?></td>
                             </tr>
                         <?php } ?>
