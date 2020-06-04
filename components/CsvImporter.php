@@ -167,6 +167,9 @@ class CsvImporter extends Component
         // Process lines
         $this->line = 1;
 
+
+//$row = fgetcsv($file, $this->maxRowLength, $this->delimiter, $this->enclosure);
+//CMS::dump($row);die;
         while (($row = fgetcsv($file, $this->maxRowLength, $this->delimiter, $this->enclosure)) !== false) {
             $row = $this->prepareRow($row);
             $this->line++;
@@ -195,8 +198,9 @@ class CsvImporter extends Component
         //if (isset($data['sku']) && !empty($data['sku']) && $data['sku'] != '') {
         //   $query->where([Product::tableName() . '.sku' => $data['sku']]);
         // } else {
-        $query->where(['name' => $data['Наименование']]); //$cr->compare('translate.name', $data['name']);
-        // }
+
+		$query->where(['name' => $data['Наименование']]); //$cr->compare('translate.name', $data['name']);
+
 
         $query->applyCategories($category_id);
 
@@ -274,8 +278,10 @@ class CsvImporter extends Component
                     if ($this->validateImage($data['Фото'])) {
                         /** @var ImageBehavior $model */
                         $imagesArray = explode(';', $data['Фото']);
+
                         foreach ($imagesArray as $n => $im) {
                             $image = CsvImage::create($im);
+
                             if ($image) {
                                 $model->attachImage($image);
                                 if ($this->deleteDownloadedImages) {
