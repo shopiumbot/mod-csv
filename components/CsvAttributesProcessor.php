@@ -41,6 +41,7 @@ class CsvAttributesProcessor extends Component
         'Фото',
         'additionalCategories',
         'wholesale_prices',
+		'full_description',
         'unit',
         'availability',
         'switch',

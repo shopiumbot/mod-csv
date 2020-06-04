@@ -229,6 +229,13 @@ class CsvImporter extends Component
             $model->price = $data['Цена'];
             $model->name = $data['Наименование'];
 
+			if(isset($data['full_description'])){
+				$model->description = $data['full_description'];
+			}
+
+
+
+
             if (isset($data['unit']) && !empty($data['unit']) && array_search(trim($data['unit']), $model->getUnits())) {
                 $model->unit = array_search(trim($data['unit']), $model->getUnits());
             } else {
