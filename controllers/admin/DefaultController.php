@@ -118,7 +118,7 @@ class DefaultController extends AdminController
                             if ($extract)
                                 unlink($filePath);
 
-                            Yii::$app->session->addFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES'));
+                            Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES'));
 
                         } else {
                             die('error 01');
@@ -128,7 +128,7 @@ class DefaultController extends AdminController
                     //$filePath = Yii::getAlias('@uploads/csv_import_images') . DIRECTORY_SEPARATOR . CMS::gen(10) . '.' . $model->files->extension;
                     $filePath = Yii::getAlias('@uploads/csv_import_images') . DIRECTORY_SEPARATOR . $model->files->name;
                     $model->files->saveAs($filePath);
-                    Yii::$app->session->addFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES'));
+                    Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES'));
                 }
                 return $this->redirect(['import']);
             }
@@ -139,7 +139,7 @@ class DefaultController extends AdminController
 
 
                 if ($importer->validate() && !$importer->hasErrors()) {
-                    Yii::$app->session->addFlash('success', Yii::t('csv/default', 'SUCCESS_IMPORT'));
+                    Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_IMPORT'));
                     $importer->import();
                 }
             }

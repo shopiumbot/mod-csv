@@ -36,16 +36,17 @@ class CsvAttributesProcessor extends Component
         'Категория',
         'Тип',
         'Цена',
+		'Цена закупки',
         'Бренд',
         'Валюта',
         'Фото',
-        'additionalCategories',
+        'Доп. категории',
         'wholesale_prices',
-		'full_description',
+		'Описание',
         'unit',
-        'availability',
+        'Количество',
         'switch',
-        'quantity',
+        'Количество',
         'currency'
     ];
 
