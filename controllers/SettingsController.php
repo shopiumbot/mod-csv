@@ -1,12 +1,13 @@
 <?php
 
-namespace shopium\mod\csv\controllers\admin;
+namespace shopium\mod\csv\controllers;
 
+use shopium\mod\user\controllers\ClientController;
 use Yii;
 use shopium\mod\csv\models\SettingsForm;
 use panix\engine\controllers\AdminController;
 
-class SettingsController extends AdminController
+class SettingsController extends ClientController
 {
 
     public $icon = 'settings';

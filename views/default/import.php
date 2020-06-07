@@ -16,14 +16,14 @@ use panix\engine\CMS;
                 <h5><?= $this->context->pageName; ?></h5>
             </div>
             <div class="card-body">
-                <div class="col mt-3">
-                    <div class="alert alert-warning"><?= Yii::t('csv/default', 'IMPORT_ALERT'); ?></div>
-                </div>
+
+                <div class="alert alert-warning"><?= Yii::t('csv/default', 'IMPORT_ALERT'); ?></div>
 
 
                 <?php if ($importer->hasErrors()) { ?>
                     <div class="form-group">
-                        <div class="errorSummary alert alert-danger"><p><?= Yii::t('csv/default', 'ERRORS_IMPORT'); ?>:</p>
+                        <div class="errorSummary alert alert-danger"><p><?= Yii::t('csv/default', 'ERRORS_IMPORT'); ?>
+                                :</p>
                             <ul>
                                 <?php
                                 $i = 0;
@@ -54,7 +54,7 @@ use panix\engine\CMS;
                             <br/>
                             <?php echo Yii::t('csv/default', 'DELETED_PRODUCTS', $importer->stats['deleted']); ?>
 
-					   </div>
+                        </div>
                     </div>
                 <?php } ?>
 
@@ -71,9 +71,8 @@ use panix\engine\CMS;
                     ]
                 ]);
                 echo $form->field($model, 'file_csv')->fileInput(['multiple' => false])->hint(Yii::t('csv/default', 'MAX_FILE_SIZE', CMS::fileSize($model::file_csv_max_size)));
-                echo $form->field($model, 'files')->fileInput(['multiple' => false])->hint(Yii::t('csv/default', 'MAX_FILE_SIZE', CMS::fileSize($model::files_max_size)));
                 echo $form->field($model, 'remove_images')->checkbox([]);
-                echo $form->field($model, 'db_backup')->checkbox([]);
+                //echo $form->field($model, 'db_backup')->checkbox([]);
                 ?>
                 <div class="form-group text-center">
                     <?= Html::submitButton(Yii::t('csv/default', 'IMPORT'), ['class' => 'btn btn-success']); ?>
@@ -101,36 +100,63 @@ use panix\engine\CMS;
 
     </div>
     <div class="col-lg-6">
-
-
-        <?= \panix\engine\grid\GridView::widget([
-            'dataProvider' => $filesData,
-            'layoutOptions' => ['title' => 'Изображения для импорта'],
-            'columns' => [
-                ['class' => 'yii\grid\SerialColumn'],
-                [
-                    'attribute' => 'img',
-                    'format' => 'raw',
-                    'contentOptions' => ['class' => 'text-center']
-
-                ],
-                [
-                    'attribute' => 'name',
-                    'format' => 'raw',
-                ],
-                [
-                    'class' => \yii\grid\ActionColumn::class,
-                    'template' => '{delete}',
-                    'contentOptions' => ['class' => 'text-center'],
-                    'header' => Yii::t('app/default', 'OPTIONS'),
-                    'buttons' => [
-                        'delete' => function ($url, $model) {
-                            return Html::a(Html::icon('delete'), ['delete-file', 'file' => $model['name']], ['class' => 'btn btn-sm btn-danger']);
-                        }
+        <div class="card">
+            <div class="card-header">
+                <h5>Изображения для импорта</h5>
+            </div>
+            <div class="card-body">
+                <?php
+                $formUpload = ActiveForm::begin([
+                    'options' => ['enctype' => 'multipart/form-data'],
+                    'fieldConfig' => [
+                        'template' => "<div class=\"col-sm-4 col-lg-4\">{label}</div>\n{beginWrapper}\n{input}\n{hint}\n{error}\n{endWrapper}",
+                        'horizontalCssClasses' => [
+                            'label' => 'col-form-label',
+                            'offset' => 'offset-sm-4 offset-lg-4',
+                            'wrapper' => 'col-sm-8 col-lg-8',
+                        ],
                     ]
-                ],
-            ]
-        ]); ?>
+                ]);
+                echo $formUpload->field($uploadModel, 'files')->fileInput(['multiple' => false])->hint(Yii::t('csv/default', 'MAX_FILE_SIZE', CMS::fileSize($model::files_max_size)));
+                ?>
+                <div class="form-group text-center">
+                    <?= Html::submitButton(Yii::t('csv/default', 'Загрузить'), ['class' => 'btn btn-success']); ?>
+                </div>
+                <?php ActiveForm::end(); ?>
+
+
+                <?= \panix\engine\grid\GridView::widget([
+                    'enableLayout' => false,
+                    'layoutPath' => '@user/views/layouts/_grid_layout',
+                    'dataProvider' => $filesData,
+                    'layoutOptions' => ['title' => 'Изображения для импорта'],
+                    'columns' => [
+                        ['class' => 'yii\grid\SerialColumn'],
+                        [
+                            'attribute' => 'img',
+                            'format' => 'raw',
+                            'contentOptions' => ['class' => 'text-center']
+
+                        ],
+                        [
+                            'attribute' => 'name',
+                            'format' => 'raw',
+                        ],
+                        [
+                            'class' => \yii\grid\ActionColumn::class,
+                            'template' => '{delete}',
+                            'contentOptions' => ['class' => 'text-center'],
+                            'header' => Yii::t('app/default', 'OPTIONS'),
+                            'buttons' => [
+                                'delete' => function ($url, $model) {
+                                    return Html::a(Html::icon('delete'), ['delete-file', 'file' => $model['name']], ['class' => 'btn btn-sm btn-danger']);
+                                }
+                            ]
+                        ],
+                    ]
+                ]); ?>
+            </div>
+        </div>
 
 
         <div class="card">
@@ -178,7 +204,7 @@ use panix\engine\CMS;
                             $value = in_array($k, $importer->required) ? $k . ' <span class="required">*</span>' : $k;
                             ?>
                             <tr>
-                                <td width="200px"><code style="font-size: inherit"><?= str_replace('eav_','',$value); ?></code></td>
+                                <td width="200px"><code style="font-size: inherit"><?= $value; ?></code></td>
                                 <td><?= $v; ?></td>
                             </tr>
                         <?php } ?>
