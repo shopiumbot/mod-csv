@@ -3,7 +3,6 @@
 namespace shopium\mod\csv\controllers;
 
 use shopium\mod\csv\models\UploadForm;
-use shopium\mod\user\controllers\ClientController;
 use Yii;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
@@ -14,14 +13,14 @@ use panix\engine\CMS;
 use panix\engine\controllers\AdminController;
 use shopium\mod\csv\components\CsvExporter;
 use shopium\mod\csv\components\CsvImporter;
-use shopium\mod\shop\models\Product;
+use core\modules\shop\models\Product;
 use shopium\mod\csv\models\FilterForm;
 use shopium\mod\csv\models\ImportForm;
 
 ignore_user_abort(1);
 set_time_limit(0);
 
-class DefaultController extends ClientController
+class DefaultController extends AdminController
 {
 
     public function actions()

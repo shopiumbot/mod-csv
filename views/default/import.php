@@ -127,7 +127,7 @@ use panix\engine\CMS;
 
                 <?= \panix\engine\grid\GridView::widget([
                     'enableLayout' => false,
-                    'layoutPath' => '@user/views/layouts/_grid_layout',
+                    //'layoutPath' => '@user/views/layouts/_grid_layout',
                     'dataProvider' => $filesData,
                     'layoutOptions' => ['title' => 'Изображения для импорта'],
                     'columns' => [
@@ -204,7 +204,7 @@ use panix\engine\CMS;
                             $value = in_array($k, $importer->required) ? $k . ' <span class="required">*</span>' : $k;
                             ?>
                             <tr>
-                                <td width="200px"><code style="font-size: inherit"><?= $value; ?></code></td>
+                                <td width="200px"><code style="font-size: inherit"><?= str_replace('eav_','',$value); ?></code></td>
                                 <td><?= $v; ?></td>
                             </tr>
                         <?php } ?>

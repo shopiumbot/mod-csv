@@ -2,12 +2,12 @@
 
 namespace shopium\mod\csv\controllers;
 
-use shopium\mod\user\controllers\ClientController;
+
 use Yii;
 use shopium\mod\csv\models\SettingsForm;
 use panix\engine\controllers\AdminController;
 
-class SettingsController extends ClientController
+class SettingsController extends AdminController
 {
 
     public $icon = 'settings';
@@ -23,7 +23,7 @@ class SettingsController extends ClientController
         $model = new SettingsForm;
 
         if ($model->load(Yii::$app->request->post())) {
-            if($model->validate()){
+            if ($model->validate()) {
                 $model->save();
                 Yii::$app->session->setFlash("success", Yii::t('app/default', 'SUCCESS_UPDATE'));
             }
