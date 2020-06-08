@@ -68,12 +68,8 @@ class DefaultController extends AdminController
         $this->pageName = Yii::t('csv/default', 'IMPORT_PRODUCTS');
         $this->buttons[] = [
             'label' => Yii::t('csv/default', 'EXPORT'),
-            'url' => ['/admin/csv/default/export'],
+            'url' => ['/csv/default/export'],
             'options' => ['class' => 'btn btn-success']
-        ];
-        $this->breadcrumbs[] = [
-            'label' => Yii::t('shop/default', 'MODULE_NAME'),
-            'url' => ['/admin/shop']
         ];
         $this->breadcrumbs[] = $this->pageName;
 
@@ -172,13 +168,8 @@ class DefaultController extends AdminController
 
         $this->buttons[] = [
             'label' => Yii::t('csv/default', 'IMPORT'),
-            'url' => ['/admin/csv/default/import'],
+            'url' => ['/csv/default/import'],
             'options' => ['class' => 'btn btn-success']
-        ];
-
-        $this->breadcrumbs[] = [
-            'label' => Yii::t('shop/default', 'MODULE_NAME'),
-            'url' => ['/admin/shop']
         ];
         $this->breadcrumbs[] = $this->pageName;
 
@@ -236,7 +227,7 @@ class DefaultController extends AdminController
         //$response->getHeaders()->add('Content-type', 'application/octet-stream');
         // $response->getHeaders()->add('Content-Disposition', 'attachment; filename=sample.csv');
 
-        $content = '"name";"category";"price";"type"' . PHP_EOL;
+        $content = '"Наименование";"Категория";"Цена";"Тип"' . PHP_EOL;
         $content .= '"Product Name";"Category/Subcategory";"10.99";"Product name"' . PHP_EOL;
 
 
@@ -253,7 +244,7 @@ class DefaultController extends AdminController
         return [
             [
                 'label' => Yii::t('app/default', 'SETTINGS'),
-                'url' => ['/admin/csv/settings/index'],
+                'url' => ['/csv/settings/index'],
                 'icon' => Html::icon('settings'),
             ],
         ];
