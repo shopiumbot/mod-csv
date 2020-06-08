@@ -2,7 +2,7 @@
 
 namespace shopium\mod\csv\controllers;
 
-use shopium\mod\csv\models\UploadForm;
+
 use Yii;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
@@ -10,10 +10,12 @@ use yii\helpers\FileHelper;
 use yii\web\UploadedFile;
 use panix\engine\Html;
 use panix\engine\CMS;
-use panix\engine\controllers\AdminController;
+use core\modules\shop\models\Product;
+use core\components\controllers\AdminController;
+
 use shopium\mod\csv\components\CsvExporter;
 use shopium\mod\csv\components\CsvImporter;
-use core\modules\shop\models\Product;
+use shopium\mod\csv\models\UploadForm;
 use shopium\mod\csv\models\FilterForm;
 use shopium\mod\csv\models\ImportForm;
 

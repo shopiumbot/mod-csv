@@ -5,7 +5,7 @@ namespace shopium\mod\csv\controllers;
 
 use Yii;
 use shopium\mod\csv\models\SettingsForm;
-use panix\engine\controllers\AdminController;
+use core\components\controllers\AdminController;
 
 class SettingsController extends AdminController
 {
