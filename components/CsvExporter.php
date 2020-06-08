@@ -2,12 +2,12 @@
 
 namespace shopium\mod\csv\components;
 
-use shopium\mod\shop\models\ProductType;
-use Yii;
-use shopium\mod\shop\models\Product;
-use shopium\mod\shop\models\Manufacturer;
-use panix\engine\CMS;
 
+use Yii;
+use core\modules\shop\models\Product;
+use core\modules\shop\models\Manufacturer;
+use core\modules\shop\models\ProductType;
+use panix\engine\CMS;
 use yii\helpers\Url;
 use yii\web\Response;
 
@@ -47,7 +47,7 @@ class CsvExporter
 
     /**
      * @param array $attributes
-     * @param $query \shopium\mod\shop\models\query\ProductQuery
+     * @param $query \core\modules\shop\models\query\ProductQuery
      */
     public function export(array $attributes, $query)
     {
@@ -70,10 +70,10 @@ class CsvExporter
                     $value = $this->getManufacturer($p);
 
                 } elseif ($attr === 'Фото') {
-                    /** @var \panix\mod\images\behaviors\ImageBehavior $img */
+                    /** @var \core\modules\images\behaviors\ImageBehavior $img */
                     $img = $p->getImage();
                     $value = ($img) ? $img->filePath : NULL;
-                } elseif ($attr === 'additionalCategories') {
+                } elseif ($attr === 'Доп. Категории') {
                     $value = $this->getAdditionalCategories($p);
                 } elseif ($attr === 'Тип') {
                     $value = $p->type->name;

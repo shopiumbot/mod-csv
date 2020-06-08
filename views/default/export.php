@@ -1,7 +1,7 @@
 <?php
 use panix\engine\Html;
-use shopium\mod\shop\models\Manufacturer;
-use shopium\mod\shop\models\ProductType;
+use core\modules\shop\models\Manufacturer;
+use core\modules\shop\models\ProductType;
 use yii\helpers\ArrayHelper;
 use panix\engine\bootstrap\ActiveForm;
 
@@ -20,7 +20,7 @@ $this->registerJs('
 
         delete fields["attributes[]"];
         
-        window.location = "/admin/csv/default/export?" + jQuery.param($.extend({}, fields));
+        window.location = "/csv/default/export?" + jQuery.param($.extend({}, fields));
     });
 ');
 
