@@ -50,10 +50,6 @@ class DefaultController extends AdminController
         $this->pageName = Yii::t('csv/default', 'IMPORT_PRODUCTS');
 
 
-        $this->breadcrumbs[] = [
-            'label' => Yii::t('shop/default', 'MODULE_NAME'),
-            'url' => ['/admin/shop']
-        ];
         $this->breadcrumbs[] = $this->pageName;
 
         return $this->render('index');

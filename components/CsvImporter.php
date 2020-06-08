@@ -240,6 +240,9 @@ class CsvImporter extends Component
             if (isset($data['Артикул']) && !empty($data['Артикул']))
                 $model->sku = $data['Артикул'];
 
+            if (isset($data['custom_id']) && !empty($data['custom_id']))
+                $model->custom_id = $data['custom_id'];
+
 
             // Currency
             if (isset($data['Валюта']) && !empty($data['Валюта']))
@@ -593,7 +596,10 @@ class CsvImporter extends Component
         foreach ((new Product)->getUnits() as $id => $unit) {
             $units .= '<code style="font-size: inherit">' . $unit . '</code><br/>';
         }
+
         $shop_config = Yii::$app->settings->get('shop');
+
+        $attributes['custom_id'] = 'Пользовательский идентификатор';
         $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
         $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
         $attributes['Категория'] = Yii::t('app/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
@@ -626,6 +632,9 @@ class CsvImporter extends Component
         }
         $attributes = [];
         $shop_config = Yii::$app->settings->get('shop');
+
+        $attributes['custom_id'] = 'Пользовательский идентификатор';
+
         if (!Yii::$app->settings->get('csv', 'use_type')) {
             $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
         }

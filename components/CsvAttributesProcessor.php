@@ -47,7 +47,8 @@ class CsvAttributesProcessor extends Component
         'Количество',
         'switch',
         'Количество',
-        'currency'
+        'currency',
+        'custom_id'
     ];
 
     /**
@@ -98,10 +99,11 @@ class CsvAttributesProcessor extends Component
                     //if (substr($key, 0, 4) === 'eav_')
                     //    $key = substr($key, 4);
 
-
+                    $name = $key;
                     $key = CMS::slug($key);
 
-                    $this->eav[$key] = $this->processEavData($key, $val);
+
+                    $this->eav[$key] = $this->processEavData($name,$key, $val);
                 }
             }
         }
@@ -113,11 +115,11 @@ class CsvAttributesProcessor extends Component
      * @param $attribute_value
      * @return array
      */
-    public function processEavData($attribute_name, $attribute_value)
+    public function processEavData($attribute_name, $attribute_key, $attribute_value)
     {
         $result = [];
 
-        $attribute = $this->getAttributeByName($attribute_name);
+        $attribute = $this->getAttributeByName($attribute_key,$attribute_name);
 
         $multipleTypes = [Attribute::TYPE_CHECKBOX_LIST, Attribute::TYPE_DROPDOWN, Attribute::TYPE_SELECT_MANY, Attribute::TYPE_COLOR];
 
@@ -186,21 +188,22 @@ class CsvAttributesProcessor extends Component
      * @param $name
      * @return Attribute
      */
-    public function getAttributeByName($name)
+    public function getAttributeByName($key,$name)
     {
 
 
-        if (isset($this->attributesCache[$name]))
-            return $this->attributesCache[$name];
+        if (isset($this->attributesCache[$key]))
+            return $this->attributesCache[$key];
 
 
-        $attribute = Attribute::find()->where(['name' => $name])->one();
+        $attribute = Attribute::find()->where(['name' => $key])->one();
 
         if (!$attribute) {
+
             // Create new attribute
             $attribute = new Attribute;
-            $attribute->title = ucfirst(str_replace('_', ' ', $name));
-            $attribute->name = CMS::slug($attribute->title);
+            $attribute->title = $name;
+            $attribute->name = $key;
             $attribute->type = Attribute::TYPE_DROPDOWN;
             $attribute->save(false);
 
@@ -211,7 +214,7 @@ class CsvAttributesProcessor extends Component
             $typeAttribute->save(false);
         }
 
-        $this->attributesCache[$name] = $attribute;
+        $this->attributesCache[$key] = $attribute;
 
         return $attribute;
     }
