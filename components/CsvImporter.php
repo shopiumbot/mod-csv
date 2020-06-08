@@ -14,6 +14,7 @@ use core\modules\shop\models\Category;
 use core\modules\shop\models\Product;
 use core\modules\images\behaviors\ImageBehavior;
 use core\modules\shop\models\Currency;
+use yii\helpers\ArrayHelper;
 
 /**
  * Import products from csv format
@@ -256,12 +257,12 @@ class CsvImporter extends Component
 
                 $categories = [$category_id];
 
-                if (isset($data['additionalCategories']))
-                    $categories = array_merge($categories, $this->getAdditionalCategories($data['additionalCategories']));
+                if (isset($data['Доп. Категории']) && !empty($data['Доп. Категории']))
+                    $categories = array_merge($categories, $this->getAdditionalCategories($data['Доп. Категории']));
 
                 //if (!$newProduct) {
-                foreach ($model->categorization as $c)
-                    $categories[] = $c->category;
+                //foreach ($model->categorization as $c)
+                //    $categories[] = $c->category;
                 $categories = array_unique($categories);
                 //}
 
@@ -275,6 +276,21 @@ class CsvImporter extends Component
 
                 // Update EAV data
                 $attributes->save();
+
+
+
+
+
+
+                    $category = Category::findOne($category_id);
+                    $categories = [];
+                    if ($category) {
+                        $tes = $category->ancestors()->excludeRoot()->all();
+                        foreach ($tes as $cat) {
+                            $categories[] = $cat->id;
+                        }
+
+                    }
 
                 // Update categories
                 $model->setCategories($categories, $category_id);
@@ -481,7 +497,7 @@ class CsvImporter extends Component
      * @param $path string Main/Music/Rock
      * @return integer category id
      */
-    protected function getCategoryByPath($path, $addition = false)
+    protected function getCategoryByPath22($path, $addition = false)
     {
 
         if (isset($this->categoriesPathCache[$path]))
@@ -509,11 +525,14 @@ class CsvImporter extends Component
         $first_model = $model;
         unset($result[0]);
 
+
+
         foreach ($result as $k => $name) {
             $model = $first_model->descendants()
                 ->where(['name' => trim($name)])
                 //->where(['name'=>trim($name)]) //One language
                 ->one();
+
             $parent = $first_model;
             if (!$model) {
                 $model = new Category;
@@ -532,7 +551,44 @@ class CsvImporter extends Component
         }
         return 1; // root category
     }
+    protected function getCategoryByPath($path)
+    {
+        if(isset($this->categoriesPathCache[$path]))
+            return $this->categoriesPathCache[$path];
 
+        if($this->rootCategory===null)
+            $this->rootCategory = Category::findOne(1);
+
+        $result = preg_split($this->subCategoryPattern, $path, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $result = array_map('stripcslashes',$result);
+
+        $parent = $this->rootCategory;
+        /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
+        $level = 2; // Level 1 is only root
+        foreach($result as $name)
+        {
+            $model = Category::find()
+                ->where(['name' => $name])
+                ->one();
+
+            if(!$model)
+            {
+                $model = new Category;
+                $model->name = $name;
+                $model->appendTo($parent);
+            }
+
+            $parent = $model;
+            $level++;
+        }
+
+        // Cache category id
+        $this->categoriesPathCache[$path] = $model->id;
+
+        if(isset($model))
+            return $model->id;
+        return 1; // root category
+    }
     /**
      * Apply column key to csv row.
      * @param $row array
