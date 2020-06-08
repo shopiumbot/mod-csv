@@ -4,7 +4,7 @@ namespace shopium\mod\csv;
 
 use panix\mod\admin\widgets\sidebar\BackendNav;
 use Yii;
-use panix\engine\WebModule;
+use core\components\WebModule;
 use yii\base\BootstrapInterface;
 use yii\web\GroupUrlRule;
 
