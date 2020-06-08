@@ -40,7 +40,7 @@ class CsvAttributesProcessor extends Component
         'Бренд',
         'Валюта',
         'Фото',
-        'Доп. категории',
+        'Доп. Категории',
         'wholesale_prices',
         'Описание',
         'unit',

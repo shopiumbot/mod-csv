@@ -544,7 +544,7 @@ class CsvImporter extends Component
         $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
         $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
         $attributes['Категория'] = Yii::t('app/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
-        $attributes['Доп. категории'] = Yii::t('app/default', 'Доп. Категории разделяются точкой с запятой <code>;</code>. На пример <code>MyCategory;MyCategory/MyCategorySub</code>.');
+        $attributes['Доп. Категории'] = Yii::t('app/default', 'Доп. категории разделяются точкой с запятой <code>;</code>. На пример <code>MyCategory;MyCategory/MyCategorySub</code>.');
         $attributes['Бренд'] = Yii::t('app/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
         $attributes['Артикул'] = Yii::t('shop/Product', 'SKU');
         $attributes['Валюта'] = Yii::t('shop/Product', 'CURRENCY_ID');
