@@ -4,10 +4,10 @@ namespace shopium\mod\csv\components;
 
 use yii\base\Component;
 use yii\base\Exception;
-use shopium\mod\shop\models\Attribute;
-use shopium\mod\shop\models\AttributeOption;
-use shopium\mod\shop\models\Product;
-use shopium\mod\shop\models\TypeAttribute;
+use core\modules\shop\models\Attribute;
+use core\modules\shop\models\AttributeOption;
+use core\modules\shop\models\Product;
+use core\modules\shop\models\TypeAttribute;
 use panix\engine\CMS;
 
 /**

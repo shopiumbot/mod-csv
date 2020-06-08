@@ -13,7 +13,6 @@ use core\modules\shop\models\Category;
 use core\modules\shop\models\Product;
 use panix\mod\images\behaviors\ImageBehavior;
 use core\modules\shop\models\Currency;
-use core\modules\shop\models\Supplier;
 
 /**
  * Import products from csv format
@@ -25,7 +24,7 @@ class CsvImporter extends Component
     /**
      * @var string column delimiter
      */
-    public $delimiter = ";";
+    public $delimiter = ",";
 
     /**
      * @var int
@@ -87,11 +86,6 @@ class CsvImporter extends Component
      * @var array
      */
     protected $manufacturerCache = [];
-
-    /**
-     * @var array
-     */
-    protected $supplierCache = [];
 
     /**
      * @var array
@@ -272,7 +266,7 @@ class CsvImporter extends Component
                     if ($this->validateImage($data['Фото'])) {
                         /** @var ImageBehavior $model */
                         $imagesArray = explode(';', $data['Фото']);
-                        $limit = Yii::$app->params['plan'][2]['product_upload_files'];
+                        $limit = Yii::$app->params['plan'][Yii::$app->user->getIdentity()->plan_id]['product_upload_files'];
                         if((count($imagesArray) > $limit) || $model->imagesCount > $limit){
                             $this->errors[] = [
                                 'line' => $this->line,
@@ -281,6 +275,7 @@ class CsvImporter extends Component
                         }else{
                             foreach ($imagesArray as $n => $im) {
                                 $image = CsvImage::create($im);
+
                                 if ($image) {
                                     $model->attachImage($image);
                                     if ($this->deleteDownloadedImages) {

@@ -34,7 +34,7 @@ class CsvImage extends UploadedFile {
 
             if ((bool) parse_url($image) && !file_exists($tmpName)) {
                 $fileHeader = get_headers($image, 1);
-                if ((int) (substr($fileHeader[0], 9, 3)) === 200)
+                if ((int) (substr($fileHeader[0], 9, 3)) === 200 || (int) (substr($fileHeader[0], 9, 3)) === 301)
                     file_put_contents($tmpName, file_get_contents($image));
             }
         } else{
