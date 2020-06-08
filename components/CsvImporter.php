@@ -3,6 +3,7 @@
 namespace shopium\mod\csv\components;
 
 
+use core\modules\shop\components\ExternalFinder;
 use Yii;
 use yii\base\Component;
 use panix\engine\CMS;
@@ -11,7 +12,7 @@ use core\modules\shop\models\ProductType;
 use core\modules\shop\models\Attribute;
 use core\modules\shop\models\Category;
 use core\modules\shop\models\Product;
-use panix\mod\images\behaviors\ImageBehavior;
+use core\modules\images\behaviors\ImageBehavior;
 use core\modules\shop\models\Currency;
 
 /**
@@ -149,6 +150,7 @@ class CsvImporter extends Component
 
         return !$this->hasErrors();
     }
+    public $external;
 
     /**
      * Here we go
@@ -159,6 +161,7 @@ class CsvImporter extends Component
         fgets($file); // Skip first
         // Process lines
         $this->line = 1;
+        $this->external = new ExternalFinder('{{%csv}}');
 
         while (($row = fgetcsv($file, $this->maxRowLength, $this->delimiter, $this->enclosure)) !== false) {
             $row = $this->prepareRow($row);
@@ -181,18 +184,22 @@ class CsvImporter extends Component
 
         $category_id = $this->getCategoryByPath($data['Категория']);
 
-        $query = Product::find();
+       // $query = Product::find();
 
         // Search product by name, category
         // or create new one
         //if (isset($data['sku']) && !empty($data['sku']) && $data['sku'] != '') {
         //   $query->where([Product::tableName() . '.sku' => $data['sku']]);
         // } else {
-        $query->where(['name' => $data['Наименование']]); //$cr->compare('translate.name', $data['name']);
+        //$query->where(['name' => $data['Наименование']]); //$cr->compare('translate.name', $data['name']);
         // }
 
 
-        $model = $query->one();
+
+        $model = $this->external->getObject(ExternalFinder::OBJECT_PRODUCT, $data['Наименование']);
+
+
+       // $model = $query->one();
 
         $hasDeleted = false;
         if (!$model) {
@@ -258,6 +265,9 @@ class CsvImporter extends Component
 
                 // Save product
                 $model->save();
+                // Create product external id
+                if ($newProduct === true)
+                    $this->external->createExternalId(ExternalFinder::OBJECT_PRODUCT, $model->id, $data['Наименование']);
 
 
                 // Update EAV data
@@ -278,14 +288,47 @@ class CsvImporter extends Component
                             ];
                         }else{
                             foreach ($imagesArray as $n => $im) {
-                                $image = CsvImage::create($im);
 
-                                if ($image) {
+                                $externalFinderImage = $this->external->getObject(ExternalFinder::OBJECT_IMAGE, $model->id . '_' . basename($im));
+
+                                if (!$externalFinderImage) {
+
+
+                                    $images = $model->getImages();
+                                    if ($images) {
+                                        foreach ($images as $image) {
+                                            $model->removeImage($image);
+                                            $externalFinderImage2 = $this->external->getObject(ExternalFinder::OBJECT_IMAGE, $model->id.'_',true,false,true);
+                                            if($externalFinderImage2){
+                                                $externalFinderImage2->delete();
+                                                $this->external->removeByPk(ExternalFinder::OBJECT_IMAGE, $image->id);
+                                            }
+                                        }
+
+                                    }
+
+                                    $image = CsvImage::create($im);
+                                    if ($image) {
+                                        $result = $model->attachImage($image);
+                                        if ($this->deleteDownloadedImages) {
+                                            $image->deleteTempFile();
+                                        }
+                                        if ($result) {
+                                            $this->external->createExternalId(ExternalFinder::OBJECT_IMAGE, $result->id, $model->id . '_' . basename($im));
+                                        }
+                                    }
+
+
+                                }
+
+
+                                //$image = CsvImage::create($im);
+                                /*if ($image) {
                                     $model->attachImage($image);
                                     if ($this->deleteDownloadedImages) {
                                         $image->deleteTempFile();
                                     }
-                                }
+                                }*/
 
                             }
                         }
@@ -363,16 +406,22 @@ class CsvImporter extends Component
         if (isset($this->manufacturerCache[$name]))
             return $this->manufacturerCache[$name];
 
-        $query = Manufacturer::find()
-            ->where(['name' => trim($name)]);
+
+
+        $model = $this->external->getObject(ExternalFinder::OBJECT_MANUFACTURER, trim($name), true);
+
+       // $query = Manufacturer::find()
+        //    ->where(['name' => trim($name)]);
 
         // ->where(['name' => $name]);
 
-        $model = $query->one();
+       // $model = $query->one();
         if (!$model) {
             $model = new Manufacturer();
             $model->name = trim($name);
-            $model->save();
+            if ($model->save()) {
+                $this->external->createExternalId(ExternalFinder::OBJECT_MANUFACTURER, $model->id, $model->name);
+            }
         }
 
         $this->manufacturerCache[$name] = $model->id;
