@@ -230,6 +230,10 @@ class CsvImporter extends Component
                 $model->manufacturer_id = $this->getManufacturerIdByName($data['Бренд']);
 
 
+            if (isset($data['Артикул']) && !empty($data['Артикул']))
+                $model->sku = $data['Артикул'];
+
+
             // Currency
             if (isset($data['Валюта']) && !empty($data['Валюта']))
                 $model->currency_id = $this->getCurrencyIdByName($data['Валюта']);
