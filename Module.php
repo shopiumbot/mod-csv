@@ -31,8 +31,9 @@ class Module extends WebModule implements BootstrapInterface
         $app->getUrlManager()->addRules($groupUrlRule->rules, false);
 
 
-
-        $this->uploadPath = '@uploads/csv_import_image/'.Yii::$app->user->id;
+        if (Yii::$app->id !== 'console') {
+            $this->uploadPath = '@uploads/csv_import_image/' . Yii::$app->user->id;
+        }
     }
 
     public function getAdminMenu()
