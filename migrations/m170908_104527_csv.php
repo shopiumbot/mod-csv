@@ -22,16 +22,14 @@ class m170908_104527_csv extends Migration
 
         $this->createTable('{{%csv}}', [
             'id' => $this->primaryKey()->unsigned(),
-            'name' => $this->string(255)->notNull(),
-            'sum' => $this->string(10)->notNull(),
-            'start_date' => $this->integer(11)->null(),
-            'end_date' => $this->integer(11)->null(),
-            'roles' => $this->string(255),
-            'switch' => $this->boolean()->defaultValue(1),
-            'created_at' => $this->integer(11)->null(),
-            'updated_at' => $this->integer(11)->null(),
+            'object_id' => $this->integer()->null(),
+            'object_type' => $this->tinyInteger()->null(),
+            'external_id' => $this->string(255)->null(),
         ], $this->tableOptions);
 
+        $this->createIndex('object_id', '{{%csv}}', 'object_id');
+        $this->createIndex('object_type', '{{%csv}}', 'object_type');
+        $this->createIndex('external_id', '{{%csv}}', 'external_id');
     }
 
     public function down()
