@@ -283,7 +283,7 @@ class CsvImporter extends Component
 
 
                     $category = Category::findOne($category_id);
-                    $categories = [];
+
                     if ($category) {
                         $tes = $category->ancestors()->excludeRoot()->all();
                         foreach ($tes as $cat) {
@@ -352,11 +352,11 @@ class CsvImporter extends Component
                             }
                         }
 
-                    } else {
-                        $this->errors[] = [
-                            'line' => $this->line,
-                            'error' => 'error image'
-                        ];
+                    //} else {
+                   //     $this->errors[] = [
+                   //         'line' => $this->line,
+                  //          'error' => 'error image'
+                  //      ];
                     }
 
                 }
@@ -551,7 +551,9 @@ class CsvImporter extends Component
         }
         return 1; // root category
     }
-    protected function getCategoryByPath($path)
+
+
+    protected function getCategoryByPath($path, $addition = false)
     {
         if(isset($this->categoriesPathCache[$path]))
             return $this->categoriesPathCache[$path];
@@ -577,8 +579,8 @@ class CsvImporter extends Component
                 $model->name = $name;
                 $model->appendTo($parent);
             }
-
             $parent = $model;
+
             $level++;
         }
 
