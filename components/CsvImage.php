@@ -23,7 +23,7 @@ class CsvImage extends UploadedFile {
     }
 
     /**
-     * @param string $image name in /uploads/importImages/ e.g. somename.jpg
+     * @param string $image name in /uploads/ e.g. somename.jpg
      * @return CsvImage|false
      */
     public static function create($image) {
