@@ -115,6 +115,7 @@ class CsvImporter extends Component
     public static $extension = ['jpg', 'jpeg'];
     public $required = ['Категория', 'Цена', 'Артикул', 'Тип'];
 
+    public $totalProductCount = 0;
 
     /**
      * @return bool validate csv file
@@ -122,7 +123,7 @@ class CsvImporter extends Component
     public function validate()
     {
 
-
+        $this->totalProductCount = Product::find()->count();
         // Check file exists and readable
         if (is_uploaded_file($this->file)) {
             $newDir = Yii::getAlias('@runtime') . '/tmp.csv';
@@ -151,6 +152,7 @@ class CsvImporter extends Component
 
         return !$this->hasErrors();
     }
+
     public $external;
 
     /**
@@ -163,10 +165,12 @@ class CsvImporter extends Component
         // Process lines
         $this->line = 1;
         $this->external = new ExternalFinder('{{%csv}}');
-
         while (($row = fgetcsv($file, $this->maxRowLength, $this->delimiter, $this->enclosure)) !== false) {
+
             $row = $this->prepareRow($row);
             $this->line++;
+
+
             $this->importRow($row);
         }
     }
@@ -185,7 +189,7 @@ class CsvImporter extends Component
 
         $category_id = $this->getCategoryByPath($data['Категория']);
 
-       // $query = Product::find();
+        // $query = Product::find();
 
         // Search product by name, category
         // or create new one
@@ -196,27 +200,39 @@ class CsvImporter extends Component
         // }
 
 
-
         $model = $this->external->getObject(ExternalFinder::OBJECT_PRODUCT, $data['Наименование']);
+        $flag = true;
+        if (!$model) {
+            $this->totalProductCount += $this->line;
+            if ($this->totalProductCount >= Yii::$app->params['plan'][Yii::$app->user->planId]['product_limit']) {
+                $this->errors[] = [
+                    'line' => $this->line,
+                    'error' => Yii::t('shop/default', 'PRODUCT_LIMIT', Yii::$app->params['plan'][Yii::$app->user->planId]['product_limit'])
+                ];
+            }
+            $flag = false;
 
-
-       // $model = $query->one();
+            //  echo $this->totalProductCount;die;
+        }
+        // $model = $query->one();
 
         $hasDeleted = false;
-        if (!$model) {
-            $newProduct = true;
-            $model = new Product;
-            $this->stats['create']++;
-        } else {
-            $this->stats['update']++;
-            if (isset($data['deleted']) && $data['deleted']) {
-                $this->stats['deleted']++;
-                $hasDeleted = true;
-                $model->delete();
-            }
+        if ($flag) {
+            if (!$model) {
+                $newProduct = true;
+                $model = new Product;
+                $this->stats['create']++;
+            } else {
+                $this->stats['update']++;
+                if (isset($data['deleted']) && $data['deleted']) {
+                    $this->stats['deleted']++;
+                    $hasDeleted = true;
+                    $model->delete();
+                }
 
+            }
         }
-        if (!$hasDeleted) {
+        if (!$hasDeleted && $flag) {
             // Process product type
             $config = Yii::$app->settings->get('csv');
             $model->type_id = $this->getTypeIdByName($data['Тип']);
@@ -278,19 +294,15 @@ class CsvImporter extends Component
                 $attributes->save();
 
 
+                $category = Category::findOne($category_id);
 
-
-
-
-                    $category = Category::findOne($category_id);
-
-                    if ($category) {
-                        $tes = $category->ancestors()->excludeRoot()->all();
-                        foreach ($tes as $cat) {
-                            $categories[] = $cat->id;
-                        }
-
+                if ($category) {
+                    $tes = $category->ancestors()->excludeRoot()->all();
+                    foreach ($tes as $cat) {
+                        $categories[] = $cat->id;
                     }
+
+                }
 
                 // Update categories
                 $model->setCategories($categories, $category_id);
@@ -299,13 +311,13 @@ class CsvImporter extends Component
                     if ($this->validateImage($data['Фото'])) {
                         /** @var ImageBehavior $model */
                         $imagesArray = explode(';', $data['Фото']);
-                        $limit = Yii::$app->params['plan'][Yii::$app->user->getIdentity()->plan_id]['product_upload_files'];
-                        if((count($imagesArray) > $limit) || $model->imagesCount > $limit){
+                        $limit = Yii::$app->params['plan'][Yii::$app->user->planId]['product_upload_files'];
+                        if ((count($imagesArray) > $limit) || $model->imagesCount > $limit) {
                             $this->errors[] = [
                                 'line' => $this->line,
-                                'error' => 'limit image'
+                                'error' => Yii::t('shop/default', 'PRODUCT_LIMIT', count($imagesArray))
                             ];
-                        }else{
+                        } else {
                             foreach ($imagesArray as $n => $im) {
 
                                 $externalFinderImage = $this->external->getObject(ExternalFinder::OBJECT_IMAGE, $model->id . '_' . basename($im));
@@ -317,8 +329,8 @@ class CsvImporter extends Component
                                     if ($images) {
                                         foreach ($images as $image) {
                                             $model->removeImage($image);
-                                            $externalFinderImage2 = $this->external->getObject(ExternalFinder::OBJECT_IMAGE, $model->id.'_',true,false,true);
-                                            if($externalFinderImage2){
+                                            $externalFinderImage2 = $this->external->getObject(ExternalFinder::OBJECT_IMAGE, $model->id . '_', true, false, true);
+                                            if ($externalFinderImage2) {
                                                 $externalFinderImage2->delete();
                                                 $this->external->removeByPk(ExternalFinder::OBJECT_IMAGE, $image->id);
                                             }
@@ -352,11 +364,11 @@ class CsvImporter extends Component
                             }
                         }
 
-                    //} else {
-                   //     $this->errors[] = [
-                   //         'line' => $this->line,
-                  //          'error' => 'error image'
-                  //      ];
+                        //} else {
+                        //     $this->errors[] = [
+                        //         'line' => $this->line,
+                        //          'error' => 'error image'
+                        //      ];
                     }
 
                 }
@@ -426,15 +438,14 @@ class CsvImporter extends Component
             return $this->manufacturerCache[$name];
 
 
-
         $model = $this->external->getObject(ExternalFinder::OBJECT_MANUFACTURER, trim($name), true);
 
-       // $query = Manufacturer::find()
+        // $query = Manufacturer::find()
         //    ->where(['name' => trim($name)]);
 
         // ->where(['name' => $name]);
 
-       // $model = $query->one();
+        // $model = $query->one();
         if (!$model) {
             $model = new Manufacturer();
             $model->name = trim($name);
@@ -526,7 +537,6 @@ class CsvImporter extends Component
         unset($result[0]);
 
 
-
         foreach ($result as $k => $name) {
             $model = $first_model->descendants()
                 ->where(['name' => trim($name)])
@@ -555,26 +565,24 @@ class CsvImporter extends Component
 
     protected function getCategoryByPath($path, $addition = false)
     {
-        if(isset($this->categoriesPathCache[$path]))
+        if (isset($this->categoriesPathCache[$path]))
             return $this->categoriesPathCache[$path];
 
-        if($this->rootCategory===null)
+        if ($this->rootCategory === null)
             $this->rootCategory = Category::findOne(1);
 
         $result = preg_split($this->subCategoryPattern, $path, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $result = array_map('stripcslashes',$result);
+        $result = array_map('stripcslashes', $result);
 
         $parent = $this->rootCategory;
         /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
         $level = 2; // Level 1 is only root
-        foreach($result as $name)
-        {
+        foreach ($result as $name) {
             $model = Category::find()
                 ->where(['name' => $name])
                 ->one();
 
-            if(!$model)
-            {
+            if (!$model) {
                 $model = new Category;
                 $model->name = $name;
                 $model->appendTo($parent);
@@ -587,10 +595,11 @@ class CsvImporter extends Component
         // Cache category id
         $this->categoriesPathCache[$path] = $model->id;
 
-        if(isset($model))
+        if (isset($model))
             return $model->id;
         return 1; // root category
     }
+
     /**
      * Apply column key to csv row.
      * @param $row array
