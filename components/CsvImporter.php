@@ -237,7 +237,13 @@ class CsvImporter extends Component
             $config = Yii::$app->settings->get('csv');
             $model->type_id = $this->getTypeIdByName($data['Тип']);
             $model->main_category_id = $category_id;
-            $model->switch = isset($data['switch']) ? $data['switch'] : 1;
+
+            if (isset($data['switch']) && !empty($data['switch'])) {
+                $model->switch = $data['switch'];
+            }else{
+                $model->switch = 1;
+            }
+
             $model->price = $data['Цена'];
             $model->name = $data['Наименование'];
 
@@ -260,6 +266,8 @@ class CsvImporter extends Component
             if (isset($data['custom_id']) && !empty($data['custom_id']))
                 $model->custom_id = $data['custom_id'];
 
+            if (isset($data['Описание']) && !empty($data['Описание']))
+                $model->description = $data['Описание'];
 
             // Currency
             if (isset($data['Валюта']) && !empty($data['Валюта']))
