@@ -2,6 +2,7 @@
 
 namespace shopium\mod\csv\components;
 
+use panix\engine\CMS;
 use Yii;
 use yii\helpers\FileHelper;
 use yii\web\UploadedFile;
@@ -9,11 +10,13 @@ use yii\web\UploadedFile;
 /**
  * Class to make easier importing images
  */
-class CsvImage extends UploadedFile {
+class CsvImage extends UploadedFile
+{
 
     public $isDownloaded = false;
 
-    public function __construct($name, $tempName, $type, $size, $error) {
+    public function __construct($name, $tempName, $type, $size, $error)
+    {
         $this->name = $name;
         $this->tempName = $tempName;
         $this->type = $type;
@@ -26,29 +29,50 @@ class CsvImage extends UploadedFile {
      * @param string $image name in /uploads/ e.g. somename.jpg
      * @return CsvImage|false
      */
-    public static function create($image) {
-        $isDownloaded = substr($image, 0, 4) === 'http';
+    public static function create($image)
+    {
+        // $isDownloaded = substr($image, 0, 4) === 'http';
+        $isDownloaded = preg_match('/http(s?)\:\/\//i', $image);
+
+        //if( !preg_match('/http(s?)\:\/\//i', $url) ) {
+        // URL does NOT contain http:// or https://
+        //}
+
 
         if ($isDownloaded) {
             $tmpName = Yii::getAlias('@runtime') . DIRECTORY_SEPARATOR . sha1(pathinfo($image, PATHINFO_FILENAME)) . '.' . pathinfo($image, PATHINFO_EXTENSION);
 
-            if ((bool) parse_url($image) && !file_exists($tmpName)) {
+            if ((bool)parse_url($image) && !file_exists($tmpName)) {
                 $fileHeader = get_headers($image, 1);
-                if ((int) (substr($fileHeader[0], 9, 3)) === 200 || (int) (substr($fileHeader[0], 9, 3)) === 301)
-                    file_put_contents($tmpName, file_get_contents($image));
+                //if ((int) (substr($fileHeader[0], 9, 3)) === 200 || (int) (substr($fileHeader[0], 9, 3)) === 301){
+                //    file_put_contents($tmpName, file_get_contents($image));
+
+                if (in_array((int)(substr($fileHeader[0], 9, 3)), [200, 301])) {
+                    //CMS::dump($fileHeader['Content-Type'][0]);die;
+                    //if (in_array($fileHeader['Content-Type'][0], ['image/jpeg'])) {
+                        $get = @file_get_contents($image);
+                        if ($get) {
+                            file_put_contents($tmpName, $get);
+                        }else{
+                            return false;
+                        }
+                    //} else {
+                    //    return false;
+                   // }
+                }
+            } else {
+                $tmpName = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . $image;
+
             }
-        } else{
-            $tmpName = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . $image;
 
+
+            if (!file_exists($tmpName))
+                return false;
+
+            $result = new CsvImage($image, $tmpName, FileHelper::getMimeType($tmpName), filesize($tmpName), UPLOAD_ERR_OK);
+            $result->isDownloaded = $isDownloaded;
+            return $result;
         }
-
-
-        if (!file_exists($tmpName))
-            return false;
-
-        $result = new CsvImage($image, $tmpName, FileHelper::getMimeType($tmpName), filesize($tmpName), UPLOAD_ERR_OK);
-        $result->isDownloaded = $isDownloaded;
-        return $result;
     }
 
     /**
@@ -56,26 +80,29 @@ class CsvImage extends UploadedFile {
      * @param bool $deleteTempFile
      * @return bool
      */
-    public function saveAs($file, $deleteTempFile = false) {
+    public function saveAs($file, $deleteTempFile = false)
+    {
 
         //if(!file_exists($this->tempName) || empty($this->tempName)){
         //echo $file;
-       //     echo $this->tempName;die;
-       // }
+        //     echo $this->tempName;die;
+        // }
         return copy($this->tempName, $file);
 
 
-       /* if ($this->error == UPLOAD_ERR_OK) {
-            if ($deleteTempFile) {
-                return move_uploaded_file($this->tempName, $file);
-            } elseif (is_uploaded_file($this->tempName)) {
-                return copy($this->tempName, $file);
-            }
-        }*/
+        /* if ($this->error == UPLOAD_ERR_OK) {
+             if ($deleteTempFile) {
+                 return move_uploaded_file($this->tempName, $file);
+             } elseif (is_uploaded_file($this->tempName)) {
+                 return copy($this->tempName, $file);
+             }
+         }*/
 
     }
 
-    public function deleteTempFile() {
+    public
+    function deleteTempFile()
+    {
         @unlink($this->tempName);
     }
 

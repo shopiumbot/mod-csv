@@ -14,6 +14,7 @@ use core\modules\shop\models\Category;
 use core\modules\shop\models\Product;
 use core\modules\images\behaviors\ImageBehavior;
 use core\modules\shop\models\Currency;
+use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -365,6 +366,11 @@ class CsvImporter extends Component
                                         if ($result) {
                                             $this->external->createExternalId(ExternalFinder::OBJECT_IMAGE, $result->id, $model->id . '_' . basename($im));
                                         }
+                                    }else{
+                                        $this->errors[] = [
+                                            'line' => $this->line,
+                                            'error' => 'Ошибка изображения'
+                                        ];
                                     }
 
 
@@ -392,8 +398,7 @@ class CsvImporter extends Component
      * @param $str
      * @return array
      */
-    public
-    function getAdditionalCategories($str)
+    public function getAdditionalCategories($str)
     {
         $result = [];
         $parts = explode(';', $str);
@@ -403,8 +408,7 @@ class CsvImporter extends Component
         return $result;
     }
 
-    private
-    function validateImage($image)
+    private function validateImage($image)
     {
         $imagesList = explode(';', $image);
         foreach ($imagesList as $i => $im) {
@@ -435,8 +439,7 @@ class CsvImporter extends Component
      * @param $name
      * @return integer
      */
-    public
-    function getManufacturerIdByName($name)
+    public function getManufacturerIdByName($name)
     {
         if (isset($this->manufacturerCache[$name]))
             return $this->manufacturerCache[$name];
@@ -467,8 +470,7 @@ class CsvImporter extends Component
      * @param string $name
      * @return integer
      */
-    public
-    function getCurrencyIdByName($name)
+    public function getCurrencyIdByName($name)
     {
         if (isset($this->currencyCache[$name]))
             return $this->currencyCache[$name];
@@ -490,8 +492,7 @@ class CsvImporter extends Component
      * @param $name
      * @return int
      */
-    public
-    function getTypeIdByName($name)
+    public function getTypeIdByName($name)
     {
         if (isset($this->productTypeCache[$name]))
             return $this->productTypeCache[$name];
@@ -514,8 +515,7 @@ class CsvImporter extends Component
      * @param $path string Main/Music/Rock
      * @return integer category id
      */
-    protected
-    function getCategoryByPath22($path, $addition = false)
+    protected function getCategoryByPath22($path, $addition = false)
     {
 
         if (isset($this->categoriesPathCache[$path]))
@@ -570,8 +570,7 @@ class CsvImporter extends Component
     }
 
 
-    protected
-    function getCategoryByPath($path, $addition = false)
+    protected function getCategoryByPath($path, $addition = false)
     {
         if (isset($this->categoriesPathCache[$path]))
             return $this->categoriesPathCache[$path];
@@ -613,8 +612,7 @@ class CsvImporter extends Component
      * @param $row array
      * @return array e.g array(key=>value)
      */
-    protected
-    function prepareRow($row)
+    protected function prepareRow($row)
     {
         $row = array_map('trim', $row);
         $row = array_combine($this->csv_columns, $row);
@@ -629,8 +627,7 @@ class CsvImporter extends Component
      * Check encoding. If !utf8 - convert.
      * @return resource csv file
      */
-    protected
-    function getFileHandler()
+    protected function getFileHandler()
     {
         $test_content = file_get_contents($this->file);
         $is_utf8 = mb_detect_encoding($test_content, 'UTF-8', true);
@@ -719,8 +716,7 @@ class CsvImporter extends Component
         return $attributes;
     }
 
-    public
-    function getExportAttributes($eav_prefix = '', $type_id)
+    public function getExportAttributes($eav_prefix = '', $type_id)
     {
 
         $units = '';
@@ -770,8 +766,7 @@ class CsvImporter extends Component
     /**
      * Close file handler
      */
-    public
-    function __destruct()
+    public function __destruct()
     {
         if ($this->fileHandler !== null)
             fclose($this->fileHandler);
