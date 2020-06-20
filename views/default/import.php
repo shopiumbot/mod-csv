@@ -45,6 +45,33 @@ use panix\engine\CMS;
                         </div>
                     </div>
                 <?php } ?>
+
+
+                <?php if ($importer->hasWarnings()) { ?>
+                    <div class="form-group">
+                        <div class="errorSummary alert alert-warning"><p><?= Yii::t('csv/default', 'WARNING_IMPORT'); ?>
+                                :</p>
+                            <ul>
+                                <?php
+                                $i = 0;
+                                foreach ($importer->getWarnings() as $warning) {
+                                    if ($i < 10) {
+                                        if ($warning['line'] > 0)
+                                            echo "<li>" . Yii::t('csv/default', 'LINE') . ": " . $warning['line'] . ". " . $warning['error'] . "</li>";
+                                        else
+                                            echo "<li>" . $warning['error'] . "</li>";
+                                    } else {
+                                        $n = count($importer->getWarnings()) - $i;
+                                        echo '<li>' . Yii::t('csv/default', 'AND_MORE', $n) . '</li>';
+                                        break;
+                                    }
+                                    $i++;
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                    </div>
+                <?php } ?>
                 <?php if ($importer->stats['create'] > 0 OR $importer->stats['update'] > 0) { ?>
                     <div class="form-group">
                         <div class="successSummary alert alert-info">

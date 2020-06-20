@@ -103,6 +103,7 @@ class CsvImporter extends Component
      * @var array
      */
     protected $errors = [];
+    protected $warnings = [];
 
     /**
      * @var array
@@ -169,9 +170,8 @@ class CsvImporter extends Component
 
             $row = $this->prepareRow($row);
             $this->line++;
-
-
             $this->importRow($row);
+
         }
     }
 
@@ -201,46 +201,53 @@ class CsvImporter extends Component
 
 
         $model = $this->external->getObject(ExternalFinder::OBJECT_PRODUCT, $data['Наименование']);
-        $flag = true;
+
+
+        $limitFlag = true;
+        // $model = $query->one();
+        $hasDeleted = false;
+
+
         if (!$model) {
-            $this->totalProductCount += $this->line;
+
+            $newProduct = true;
+            $model = new Product;
+
+
             if ($this->totalProductCount >= Yii::$app->params['plan'][Yii::$app->user->planId]['product_limit']) {
-                $this->errors[] = [
+                $this->warnings[] = [
                     'line' => $this->line,
                     'error' => Yii::t('shop/default', 'PRODUCT_LIMIT', Yii::$app->params['plan'][Yii::$app->user->planId]['product_limit'])
                 ];
+                $limitFlag = false;
             }
-            $flag = false;
 
-            //  echo $this->totalProductCount;die;
-        }
-        // $model = $query->one();
+            $this->totalProductCount++;
 
-        $hasDeleted = false;
-        if ($flag) {
-            if (!$model) {
-                $newProduct = true;
-                $model = new Product;
+            if ($this->totalProductCount <= Yii::$app->params['plan'][Yii::$app->user->planId]['product_limit']) {
                 $this->stats['create']++;
-            } else {
-                $this->stats['update']++;
-                if (isset($data['deleted']) && $data['deleted']) {
-                    $this->stats['deleted']++;
-                    $hasDeleted = true;
-                    $model->delete();
-                }
-
             }
+        } else {
+            $this->stats['update']++;
+            if (isset($data['deleted']) && $data['deleted']) {
+                $this->stats['deleted']++;
+                $hasDeleted = true;
+                $model->delete();
+            }
+
         }
-        if (!$hasDeleted && $flag) {
+
+        if (!$hasDeleted && $limitFlag) {
             // Process product type
             $config = Yii::$app->settings->get('csv');
+
             $model->type_id = $this->getTypeIdByName($data['Тип']);
+
             $model->main_category_id = $category_id;
 
             if (isset($data['switch']) && !empty($data['switch'])) {
                 $model->switch = $data['switch'];
-            }else{
+            } else {
                 $model->switch = 1;
             }
 
@@ -294,8 +301,11 @@ class CsvImporter extends Component
                 // Save product
                 $model->save();
                 // Create product external id
-                if ($newProduct === true)
+                if ($newProduct === true) {
+
+
                     $this->external->createExternalId(ExternalFinder::OBJECT_PRODUCT, $model->id, $data['Наименование']);
+                }
 
 
                 // Update EAV data
@@ -359,26 +369,9 @@ class CsvImporter extends Component
 
 
                                 }
-
-
-                                //$image = CsvImage::create($im);
-                                /*if ($image) {
-                                    $model->attachImage($image);
-                                    if ($this->deleteDownloadedImages) {
-                                        $image->deleteTempFile();
-                                    }
-                                }*/
-
                             }
                         }
-
-                        //} else {
-                        //     $this->errors[] = [
-                        //         'line' => $this->line,
-                        //          'error' => 'error image'
-                        //      ];
                     }
-
                 }
 
             } else {
@@ -399,7 +392,8 @@ class CsvImporter extends Component
      * @param $str
      * @return array
      */
-    public function getAdditionalCategories($str)
+    public
+    function getAdditionalCategories($str)
     {
         $result = [];
         $parts = explode(';', $str);
@@ -409,7 +403,8 @@ class CsvImporter extends Component
         return $result;
     }
 
-    private function validateImage($image)
+    private
+    function validateImage($image)
     {
         $imagesList = explode(';', $image);
         foreach ($imagesList as $i => $im) {
@@ -440,7 +435,8 @@ class CsvImporter extends Component
      * @param $name
      * @return integer
      */
-    public function getManufacturerIdByName($name)
+    public
+    function getManufacturerIdByName($name)
     {
         if (isset($this->manufacturerCache[$name]))
             return $this->manufacturerCache[$name];
@@ -471,7 +467,8 @@ class CsvImporter extends Component
      * @param string $name
      * @return integer
      */
-    public function getCurrencyIdByName($name)
+    public
+    function getCurrencyIdByName($name)
     {
         if (isset($this->currencyCache[$name]))
             return $this->currencyCache[$name];
@@ -493,7 +490,8 @@ class CsvImporter extends Component
      * @param $name
      * @return int
      */
-    public function getTypeIdByName($name)
+    public
+    function getTypeIdByName($name)
     {
         if (isset($this->productTypeCache[$name]))
             return $this->productTypeCache[$name];
@@ -516,7 +514,8 @@ class CsvImporter extends Component
      * @param $path string Main/Music/Rock
      * @return integer category id
      */
-    protected function getCategoryByPath22($path, $addition = false)
+    protected
+    function getCategoryByPath22($path, $addition = false)
     {
 
         if (isset($this->categoriesPathCache[$path]))
@@ -571,7 +570,8 @@ class CsvImporter extends Component
     }
 
 
-    protected function getCategoryByPath($path, $addition = false)
+    protected
+    function getCategoryByPath($path, $addition = false)
     {
         if (isset($this->categoriesPathCache[$path]))
             return $this->categoriesPathCache[$path];
@@ -613,7 +613,8 @@ class CsvImporter extends Component
      * @param $row array
      * @return array e.g array(key=>value)
      */
-    protected function prepareRow($row)
+    protected
+    function prepareRow($row)
     {
         $row = array_map('trim', $row);
         $row = array_combine($this->csv_columns, $row);
@@ -628,7 +629,8 @@ class CsvImporter extends Component
      * Check encoding. If !utf8 - convert.
      * @return resource csv file
      */
-    protected function getFileHandler()
+    protected
+    function getFileHandler()
     {
         $test_content = file_get_contents($this->file);
         $is_utf8 = mb_detect_encoding($test_content, 'UTF-8', true);
@@ -652,12 +654,31 @@ class CsvImporter extends Component
         return !empty($this->errors);
     }
 
+
     /**
      * @return array
      */
     public function getErrors()
     {
         return $this->errors;
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function hasWarnings()
+    {
+        return !empty($this->warnings);
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getWarnings()
+    {
+        return $this->warnings;
     }
 
     /**
@@ -698,7 +719,8 @@ class CsvImporter extends Component
         return $attributes;
     }
 
-    public function getExportAttributes($eav_prefix = '', $type_id)
+    public
+    function getExportAttributes($eav_prefix = '', $type_id)
     {
 
         $units = '';
@@ -748,7 +770,8 @@ class CsvImporter extends Component
     /**
      * Close file handler
      */
-    public function __destruct()
+    public
+    function __destruct()
     {
         if ($this->fileHandler !== null)
             fclose($this->fileHandler);
