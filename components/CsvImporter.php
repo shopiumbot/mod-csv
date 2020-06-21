@@ -519,137 +519,10 @@ class CsvImporter extends Component
 
     /**
      * Get category id by path. If category not exits it will new one.
-     * @param $path string Main/Music/Rock
+     * @param $path string Catalog/Shoes/Nike
      * @return integer category id
      */
-    protected function getCategoryByPath__($path, $addition = false)
-    {
-
-        if (isset($this->categoriesPathCache[$path]))
-            return $this->categoriesPathCache[$path];
-
-        if ($this->rootCategory === null)
-            $this->rootCategory = Category::findOne(1);
-
-
-        $result = preg_split($this->subCategoryPattern, $path, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $result = array_map('stripcslashes', $result);
-
-
-        $parent = $this->rootCategory;
-
-        /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
-        $model = Category::find()
-            ->where(['name' => trim($result[0])])
-            ->one();
-        if (!$model) {
-            $model = new Category;
-            $model->name = trim($result[0]);
-            $model->appendTo($parent);
-        }
-        $first_model = $model;
-        unset($result[0]);
-
-
-        foreach ($result as $k => $name) {
-            $model = $first_model->descendants()
-                ->where(['name' => trim($name)])
-                //->where(['name'=>trim($name)]) //One language
-                ->one();
-
-            $parent = $first_model;
-            if (!$model) {
-                $model = new Category;
-                $model->name = $name;
-                $model->appendTo($parent);
-            }
-
-        }
-
-
-        // Cache category id
-        $this->categoriesPathCache[$path] = $model->id;
-
-        if (isset($model)) {
-            return $model->id;
-        }
-        return 1; // root category
-    }
-
-    protected function getCategoryByPath33($path, $addition = false)
-    {
-        if (isset($this->categoriesPathCache[$path]))
-            return $this->categoriesPathCache[$path];
-
-        if ($this->rootCategory === null)
-            $this->rootCategory = Category::findOne(1);
-
-        $result = preg_split($this->subCategoryPattern, $path, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $result = array_map('stripcslashes', $result);
-        //   CMS::dump($result);die;
-        $parent = $this->rootCategory;
-        /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
-        $level = 2; // Level 1 is only root
-
-        $model = Category::find()
-            //->orderBy(['lft'=>SORT_DESC])
-            ->where(['full_path' => $path])//
-            ->one();
-        //  CMS::dump($model->id);die;
-        if (!$model) {
-            $model = new Category;
-            $model->name = end($result);
-            $model->full_path = $path;
-            $model->appendTo($parent);
-        }
-        $parent = $model;
-
-        $level++;
-
-
-        // Cache category id
-        $this->categoriesPathCache[$path] = $model->id;
-
-        if (isset($model))
-            return $model->id;
-        return 1; // root category
-    }
-
-    protected function getCategoryByPath22($path, $addition = false)
-    {
-        if (isset($this->categoriesPathCache[$path]))
-            return $this->categoriesPathCache[$path];
-
-        if ($this->rootCategory === null)
-            $this->rootCategory = Category::findOne(1);
-
-        $result = preg_split($this->subCategoryPattern, $path, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $result = array_map('stripcslashes', $result);
-
-
-        $test = $result;
-        krsort($test);
-
-        $parent = $this->rootCategory;
-
-        /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
-
-        $level = 2; // Level 1 is only root
-
-        $model = Category::find()->where(['full_path' => $path])->one();
-        if (!$model) {
-            return false;
-        }
-        // Cache category id
-        $this->categoriesPathCache[$path] = $model->id;
-
-        if (isset($model))
-            return $model->id;
-        return 1; // root category
-    }
-
-
-    protected function getCategoryByPath($path, $addition = false)
+    protected function getCategoryByPath($path)
     {
         if (isset($this->categoriesPathCache[$path]))
             return $this->categoriesPathCache[$path];
@@ -665,10 +538,8 @@ class CsvImporter extends Component
         // krsort($test);
 
         $parent = $this->rootCategory;
-
-        /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
         $level = 2; // Level 1 is only root
-
+        /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
 
         /*$leaf = array_pop($result);
         $tree = [];
@@ -681,14 +552,14 @@ class CsvImporter extends Component
 
 
         $pathName = '';
-        $dd = [];
+        $tree = [];
         foreach ($result as $key => $name) {
             $pathName .= '/' . $name;
-            $dd[] = substr($pathName, 1);
+            $tree[] = substr($pathName, 1);
         }
 
 
-        foreach ($dd as $key => $name) {
+        foreach ($tree as $key => $name) {
             $object = explode('/', $name);
             $model = Category::find()->where(['full_path' => $name])->one();
 
@@ -725,45 +596,6 @@ class CsvImporter extends Component
         return $data;
     }
 
-    protected function getCategoryByPath123($path, $addition = false)
-    {
-        if (isset($this->categoriesPathCache[$path]))
-            return $this->categoriesPathCache[$path];
-
-        if ($this->rootCategory === null)
-            $this->rootCategory = Category::findOne(1);
-
-        $result = preg_split($this->subCategoryPattern, $path, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $result = array_map('stripcslashes', $result);
-
-        $parent = $this->rootCategory;
-        /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
-        $level = 2; // Level 1 is only root
-        foreach ($result as $name) {
-            $model = Category::find()
-                //->orderBy(['lft'=>SORT_DESC])
-                ->where(['name' => $name])//
-                ->andWhere('depth > ' . ($level))
-                ->one();
-            //  CMS::dump($model->id);die;
-            if (!$model) {
-                $model = new Category;
-                $model->name = $name;
-                $model->full_path = $path;
-                $model->appendTo($parent);
-            }
-            $parent = $model;
-
-            $level++;
-        }
-
-        // Cache category id
-        $this->categoriesPathCache[$path] = $model->id;
-
-        if (isset($model))
-            return $model->id;
-        return 1; // root category
-    }
 
     /**
      * Apply column key to csv row.
