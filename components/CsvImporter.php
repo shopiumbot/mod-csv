@@ -189,12 +189,6 @@ class CsvImporter extends Component
         $newProduct = false;
 
         $category_id = $this->getCategoryByPath($data['Категория']);
-        if (!$category_id) {
-            /*$this->errors[] = [
-                'line' => $this->line,
-                'error' => 'Категория не найдена, создайте категорию'
-            ];*/
-        }
         // $query = Product::find();
 
         // Search product by name, category
@@ -202,7 +196,7 @@ class CsvImporter extends Component
         //if (isset($data['sku']) && !empty($data['sku']) && $data['sku'] != '') {
         //   $query->where([Product::tableName() . '.sku' => $data['sku']]);
         // } else {
-        //$query->where(['name' => $data['Наименование']]); //$cr->compare('translate.name', $data['name']);
+        //$query->where(['name' => $data['Наименование']]);
         // }
 
 
@@ -561,7 +555,7 @@ class CsvImporter extends Component
 
         foreach ($tree as $key => $name) {
             $object = explode('/', $name);
-            $model = Category::find()->where(['full_path' => $name])->one();
+            $model = Category::find()->where(['path_hash' => md5($name)])->one();
 
             if (!$model) {
                 $model = new Category;
