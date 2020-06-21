@@ -189,7 +189,12 @@ class CsvImporter extends Component
         $newProduct = false;
 
         $category_id = $this->getCategoryByPath($data['Категория']);
-
+        if (!$category_id) {
+            /*$this->errors[] = [
+                'line' => $this->line,
+                'error' => 'Категория не найдена, создайте категорию'
+            ];*/
+        }
         // $query = Product::find();
 
         // Search product by name, category
@@ -366,7 +371,7 @@ class CsvImporter extends Component
                                         if ($result) {
                                             $this->external->createExternalId(ExternalFinder::OBJECT_IMAGE, $result->id, $model->id . '_' . basename($im));
                                         }
-                                    }else{
+                                    } else {
                                         $this->errors[] = [
                                             'line' => $this->line,
                                             'error' => 'Ошибка изображения'
@@ -405,6 +410,8 @@ class CsvImporter extends Component
         foreach ($parts as $path) {
             $result[] = $this->getCategoryByPath(trim($path), true);
         }
+
+
         return $result;
     }
 
@@ -515,7 +522,7 @@ class CsvImporter extends Component
      * @param $path string Main/Music/Rock
      * @return integer category id
      */
-    protected function getCategoryByPath22($path, $addition = false)
+    protected function getCategoryByPath__($path, $addition = false)
     {
 
         if (isset($this->categoriesPathCache[$path]))
@@ -569,8 +576,156 @@ class CsvImporter extends Component
         return 1; // root category
     }
 
+    protected function getCategoryByPath33($path, $addition = false)
+    {
+        if (isset($this->categoriesPathCache[$path]))
+            return $this->categoriesPathCache[$path];
+
+        if ($this->rootCategory === null)
+            $this->rootCategory = Category::findOne(1);
+
+        $result = preg_split($this->subCategoryPattern, $path, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $result = array_map('stripcslashes', $result);
+        //   CMS::dump($result);die;
+        $parent = $this->rootCategory;
+        /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
+        $level = 2; // Level 1 is only root
+
+        $model = Category::find()
+            //->orderBy(['lft'=>SORT_DESC])
+            ->where(['full_path' => $path])//
+            ->one();
+        //  CMS::dump($model->id);die;
+        if (!$model) {
+            $model = new Category;
+            $model->name = end($result);
+            $model->full_path = $path;
+            $model->appendTo($parent);
+        }
+        $parent = $model;
+
+        $level++;
+
+
+        // Cache category id
+        $this->categoriesPathCache[$path] = $model->id;
+
+        if (isset($model))
+            return $model->id;
+        return 1; // root category
+    }
+
+    protected function getCategoryByPath22($path, $addition = false)
+    {
+        if (isset($this->categoriesPathCache[$path]))
+            return $this->categoriesPathCache[$path];
+
+        if ($this->rootCategory === null)
+            $this->rootCategory = Category::findOne(1);
+
+        $result = preg_split($this->subCategoryPattern, $path, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $result = array_map('stripcslashes', $result);
+
+
+        $test = $result;
+        krsort($test);
+
+        $parent = $this->rootCategory;
+
+        /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
+
+        $level = 2; // Level 1 is only root
+
+        $model = Category::find()->where(['full_path' => $path])->one();
+        if (!$model) {
+            return false;
+        }
+        // Cache category id
+        $this->categoriesPathCache[$path] = $model->id;
+
+        if (isset($model))
+            return $model->id;
+        return 1; // root category
+    }
+
 
     protected function getCategoryByPath($path, $addition = false)
+    {
+        if (isset($this->categoriesPathCache[$path]))
+            return $this->categoriesPathCache[$path];
+
+        if ($this->rootCategory === null)
+            $this->rootCategory = Category::findOne(1);
+
+        $result = preg_split($this->subCategoryPattern, $path, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $result = array_map('stripcslashes', $result);
+
+
+        // $test = $result;
+        // krsort($test);
+
+        $parent = $this->rootCategory;
+
+        /** @var \panix\engine\behaviors\nestedsets\NestedSetsBehavior $model */
+        $level = 2; // Level 1 is only root
+
+
+        /*$leaf = array_pop($result);
+        $tree = [];
+        $branch = &$tree;
+        foreach ($result as $name) {
+            $branch[$name] = [];
+            $branch = &$branch[$name];
+        }
+        $branch = $leaf;*/
+
+
+        $pathName = '';
+        $dd = [];
+        foreach ($result as $key => $name) {
+            $pathName .= '/' . $name;
+            $dd[] = substr($pathName, 1);
+        }
+
+
+        foreach ($dd as $key => $name) {
+            $object = explode('/', $name);
+            $model = Category::find()->where(['full_path' => $name])->one();
+
+            if (!$model) {
+                $model = new Category;
+                $model->name = end($object);
+                $model->appendTo($parent);
+            }
+
+            $parent = $model;
+            $level++;
+
+        }
+        // Cache category id
+        $this->categoriesPathCache[$path] = $model->id;
+
+        if (isset($model))
+            return $model->id;
+        return 1; // root category
+    }
+
+    private function test2($tree)
+    {
+        $data = [];
+        $test = '';
+        if (is_array($tree)) {
+            foreach ($tree as $key => $name) {
+                $data[$key] = $this->test2($name);
+            }
+        } else {
+            $data[] = $tree;
+        }
+
+        return $data;
+    }
+
+    protected function getCategoryByPath123($path, $addition = false)
     {
         if (isset($this->categoriesPathCache[$path]))
             return $this->categoriesPathCache[$path];
@@ -586,12 +741,15 @@ class CsvImporter extends Component
         $level = 2; // Level 1 is only root
         foreach ($result as $name) {
             $model = Category::find()
-                ->where(['name' => $name])
+                //->orderBy(['lft'=>SORT_DESC])
+                ->where(['name' => $name])//
+                ->andWhere('depth > ' . ($level))
                 ->one();
-
+            //  CMS::dump($model->id);die;
             if (!$model) {
                 $model = new Category;
                 $model->name = $name;
+                $model->full_path = $path;
                 $model->appendTo($parent);
             }
             $parent = $model;
