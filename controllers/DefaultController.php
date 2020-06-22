@@ -112,7 +112,7 @@ class DefaultController extends AdminController
                             if ($extract)
                                 unlink($filePath);
 
-                            Yii::$app->session->addFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES'));
+                            Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES'));
 
                         } else {
                             die('error 01');
@@ -123,7 +123,7 @@ class DefaultController extends AdminController
                     $filePath = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . $uploadModel->files->name;
 
                     $uploadModel->files->saveAs($filePath);
-                    Yii::$app->session->addFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES'));
+                    Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES'));
                 }
                 return $this->redirect(['import']);
             }
@@ -139,7 +139,7 @@ class DefaultController extends AdminController
 
 
                 if ($importer->validate() && !$importer->hasErrors()) {
-                    Yii::$app->session->addFlash('success', Yii::t('csv/default', 'SUCCESS_IMPORT'));
+                    Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_IMPORT'));
                     $importer->import();
                 }
             }
