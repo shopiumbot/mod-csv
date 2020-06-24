@@ -78,7 +78,7 @@ class DefaultController extends AdminController
             $data[] = [
                 'file' => $f,
                 'name' => $name,
-                'img' => Html::img('/uploads/csv_import_image/'.Yii::$app->user->id.'/' . $name, ['width' => 100])
+                'img' => Html::img('/uploads/csv_import_image/' . Yii::$app->user->id . '/' . $name, ['width' => 100])
             ];
         }
 
@@ -119,7 +119,6 @@ class DefaultController extends AdminController
                         }
                     }
                 } elseif (in_array($uploadModel->files->extension, $importer::$extension)) {
-                    //$filePath = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . CMS::gen(10) . '.' . $uploadModel->files->extension;
                     $filePath = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . $uploadModel->files->name;
 
                     $uploadModel->files->saveAs($filePath);
@@ -141,6 +140,40 @@ class DefaultController extends AdminController
                 if ($importer->validate() && !$importer->hasErrors()) {
                     Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_IMPORT'));
                     $importer->import();
+                    $errImport = 0;
+                    $wrnImport = 0;
+                    foreach ($importer->getErrors() as $error) {
+
+                        if ($errImport < 10) {
+                            if ($error['line'] > 0)
+                                Yii::$app->session->addFlash('import-error', Yii::t('csv/default', 'LINE') . ": " . $error['line'] . ". " . $error['error']);
+                            else
+                                Yii::$app->session->addFlash('import-error', $error['error']);
+                        } else {
+                            $n = count($importer->getErrors()) - $errImport;
+                            Yii::$app->session->addFlash('import-error', Yii::t('csv/default', 'AND_MORE', $n));
+                            break;
+                        }
+                        $errImport++;
+                    }
+
+
+                    foreach ($importer->getWarnings() as $warning) {
+
+                        if ($wrnImport < 10) {
+                            if ($warning['line'] > 0)
+                                Yii::$app->session->addFlash('import-warning', Yii::t('csv/default', 'LINE') . ": " . $warning['line'] . ". " . $warning['error']);
+                            else
+                                Yii::$app->session->addFlash('import-warning', $warning['error']);
+                        } else {
+                            $n = count($importer->getWarnings()) - $wrnImport;
+                            Yii::$app->session->addFlash('import-warning', Yii::t('csv/default', 'AND_MORE', $n));
+                            break;
+                        }
+                        $wrnImport++;
+                    }
+
+                    return $this->refresh();
                 }
             }
 

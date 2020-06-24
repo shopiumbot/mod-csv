@@ -361,6 +361,7 @@ class CsvImporter extends Component
                                         $result = $model->attachImage($image);
 
                                         if ($this->deleteDownloadedImages) {
+
                                             $image->deleteTempFile();
                                         }
                                         if ($result) {

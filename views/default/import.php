@@ -9,6 +9,9 @@ use panix\engine\CMS;
 
 ?>
 
+<?php
+
+?>
 <div class="row">
     <div class="col-lg-6">
         <div class="card">
@@ -20,26 +23,16 @@ use panix\engine\CMS;
                 <div class="alert alert-warning"><?= Yii::t('csv/default', 'IMPORT_ALERT'); ?></div>
 
 
-                <?php if ($importer->hasErrors()) { ?>
+                <?php if (Yii::$app->session->hasFlash('import-error')) { ?>
                     <div class="form-group">
                         <div class="errorSummary alert alert-danger"><p><?= Yii::t('csv/default', 'ERRORS_IMPORT'); ?>
                                 :</p>
                             <ul>
                                 <?php
-                                $i = 0;
-                                foreach ($importer->getErrors() as $error) {
-                                    if ($i < 10) {
-                                        if ($error['line'] > 0)
-                                            echo "<li>" . Yii::t('csv/default', 'LINE') . ": " . $error['line'] . ". " . $error['error'] . "</li>";
-                                        else
-                                            echo "<li>" . $error['error'] . "</li>";
-                                    } else {
-                                        $n = count($importer->getErrors()) - $i;
-                                        echo '<li>' . Yii::t('csv/default', 'AND_MORE', $n) . '</li>';
-                                        break;
-                                    }
-                                    $i++;
+                                foreach (Yii::$app->session->getFlash('import-error') as $flash) {
+                                    echo '<li>' . $flash . '</li>';
                                 }
+
                                 ?>
                             </ul>
                         </div>
@@ -47,25 +40,14 @@ use panix\engine\CMS;
                 <?php } ?>
 
 
-                <?php if ($importer->hasWarnings()) { ?>
+                <?php if (Yii::$app->session->hasFlash('import-warning')) { ?>
                     <div class="form-group">
                         <div class="errorSummary alert alert-warning"><p><?= Yii::t('csv/default', 'WARNING_IMPORT'); ?>
                                 :</p>
                             <ul>
                                 <?php
-                                $i = 0;
-                                foreach ($importer->getWarnings() as $warning) {
-                                    if ($i < 10) {
-                                        if ($warning['line'] > 0)
-                                            echo "<li>" . Yii::t('csv/default', 'LINE') . ": " . $warning['line'] . ". " . $warning['error'] . "</li>";
-                                        else
-                                            echo "<li>" . $warning['error'] . "</li>";
-                                    } else {
-                                        $n = count($importer->getWarnings()) - $i;
-                                        echo '<li>' . Yii::t('csv/default', 'AND_MORE', $n) . '</li>';
-                                        break;
-                                    }
-                                    $i++;
+                                foreach (Yii::$app->session->getFlash('import-warning') as $flash) {
+                                    echo '<li>' . $flash . '</li>';
                                 }
                                 ?>
                             </ul>
@@ -231,7 +213,9 @@ use panix\engine\CMS;
                             $value = in_array($k, $importer->required) ? $k . ' <span class="required">*</span>' : $k;
                             ?>
                             <tr>
-                                <td width="200px"><code style="font-size: inherit"><?= str_replace('eav_','',$value); ?></code></td>
+                                <td width="200px"><code
+                                            style="font-size: inherit"><?= str_replace('eav_', '', $value); ?></code>
+                                </td>
                                 <td><?= $v; ?></td>
                             </tr>
                         <?php } ?>
