@@ -58,12 +58,13 @@ class CsvImage extends UploadedFile
                     }
 
                 }
-            } else {
-                $tmpName = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . $image;
-
             }
+        } else {
+            $tmpName = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . $image;
 
         }
+
+
         if (!file_exists($tmpName))
             return false;
 

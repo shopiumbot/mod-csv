@@ -355,9 +355,7 @@ class CsvImporter extends Component
                                         }
 
                                     }
-if($this->line == 73){
-echo $im;die;
-}
+
                                     $image = CsvImage::create($im);
                                     if ($image) {
                                         $result = $model->attachImage($image);
