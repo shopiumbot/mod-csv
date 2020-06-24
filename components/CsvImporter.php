@@ -355,15 +355,23 @@ class CsvImporter extends Component
                                         }
 
                                     }
-
+if($this->line == 73){
+echo $im;die;
+}
                                     $image = CsvImage::create($im);
                                     if ($image) {
                                         $result = $model->attachImage($image);
+
                                         if ($this->deleteDownloadedImages) {
                                             $image->deleteTempFile();
                                         }
                                         if ($result) {
                                             $this->external->createExternalId(ExternalFinder::OBJECT_IMAGE, $result->id, $model->id . '_' . basename($im));
+                                        }else{
+                                            $this->errors[] = [
+                                                'line' => $this->line,
+                                                'error' => 'Ошибка изображения 0001'
+                                            ];
                                         }
                                     } else {
                                         $this->errors[] = [

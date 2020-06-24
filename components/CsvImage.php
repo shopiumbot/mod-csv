@@ -50,29 +50,27 @@ class CsvImage extends UploadedFile
                 if (in_array((int)(substr($fileHeader[0], 9, 3)), [200, 301])) {
                     //CMS::dump($fileHeader['Content-Type'][0]);die;
                     //if (in_array($fileHeader['Content-Type'][0], ['image/jpeg'])) {
-                        $get = @file_get_contents($image);
-                        if ($get) {
-                            file_put_contents($tmpName, $get);
-                        }else{
-                            return false;
-                        }
-                    //} else {
-                    //    return false;
-                   // }
+                    $get = @file_get_contents($image);
+                    if ($get) {
+                        file_put_contents($tmpName, $get);
+                    } else {
+                        return false;
+                    }
+
                 }
             } else {
                 $tmpName = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . $image;
 
             }
 
-
-            if (!file_exists($tmpName))
-                return false;
-
-            $result = new CsvImage($image, $tmpName, FileHelper::getMimeType($tmpName), filesize($tmpName), UPLOAD_ERR_OK);
-            $result->isDownloaded = $isDownloaded;
-            return $result;
         }
+        if (!file_exists($tmpName))
+            return false;
+
+        $result = new CsvImage($image, $tmpName, FileHelper::getMimeType($tmpName), filesize($tmpName), UPLOAD_ERR_OK);
+        $result->isDownloaded = $isDownloaded;
+        return $result;
+
     }
 
     /**
