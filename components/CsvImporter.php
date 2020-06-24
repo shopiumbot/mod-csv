@@ -477,6 +477,7 @@ class CsvImporter extends Component
      * Find Currency
      * @param string $name
      * @return integer
+     * @throws Exception
      */
     public function getCurrencyIdByName($name)
     {
@@ -577,8 +578,10 @@ class CsvImporter extends Component
         // Cache category id
         $this->categoriesPathCache[$path] = $model->id;
 
-        if (isset($model))
+        if (isset($model)){
             return $model->id;
+        }
+
         return 1; // root category
     }
 

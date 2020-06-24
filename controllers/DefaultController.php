@@ -159,7 +159,6 @@ class DefaultController extends AdminController
 
 
                     foreach ($importer->getWarnings() as $warning) {
-
                         if ($wrnImport < 10) {
                             if ($warning['line'] > 0)
                                 Yii::$app->session->addFlash('import-warning', Yii::t('csv/default', 'LINE') . ": " . $warning['line'] . ". " . $warning['error']);
@@ -172,6 +171,20 @@ class DefaultController extends AdminController
                         }
                         $wrnImport++;
                     }
+
+
+
+
+                        if ($importer->stats['create'] > 0) {
+                            Yii::$app->session->addFlash('import-state', Yii::t('csv/default', 'CREATE_PRODUCTS', $importer->stats['create']));
+                        }
+                        if ($importer->stats['update'] > 0) {
+                            Yii::$app->session->addFlash('import-state', Yii::t('csv/default', 'UPDATE_PRODUCTS', $importer->stats['update']));
+                        }
+                        if ($importer->stats['deleted'] > 0) {
+                            Yii::$app->session->addFlash('import-state', Yii::t('csv/default', 'DELETED_PRODUCTS', $importer->stats['deleted']));
+                        }
+
 
                     return $this->refresh();
                 }

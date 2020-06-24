@@ -9,9 +9,11 @@ use panix\engine\CMS;
 
 ?>
 
-<?php
+<?php if (Yii::$app->session->hasFlash('success')) { ?>
 
-?>
+    <div class="alert alert-success"><?= Yii::$app->session->getFlash('success'); ?></div>
+
+<?php } ?>
 <div class="row">
     <div class="col-lg-6">
         <div class="card">
@@ -32,7 +34,6 @@ use panix\engine\CMS;
                                 foreach (Yii::$app->session->getFlash('import-error') as $flash) {
                                     echo '<li>' . $flash . '</li>';
                                 }
-
                                 ?>
                             </ul>
                         </div>
@@ -42,8 +43,8 @@ use panix\engine\CMS;
 
                 <?php if (Yii::$app->session->hasFlash('import-warning')) { ?>
                     <div class="form-group">
-                        <div class="errorSummary alert alert-warning"><p><?= Yii::t('csv/default', 'WARNING_IMPORT'); ?>
-                                :</p>
+                        <div class="errorSummary alert alert-warning">
+                            <p><?= Yii::t('csv/default', 'WARNING_IMPORT'); ?></p>
                             <ul>
                                 <?php
                                 foreach (Yii::$app->session->getFlash('import-warning') as $flash) {
@@ -54,18 +55,20 @@ use panix\engine\CMS;
                         </div>
                     </div>
                 <?php } ?>
-                <?php if ($importer->stats['create'] > 0 OR $importer->stats['update'] > 0) { ?>
-                    <div class="form-group">
-                        <div class="successSummary alert alert-info">
-                            <?php echo Yii::t('csv/default', 'CREATE_PRODUCTS', $importer->stats['create']); ?>
-                            <br/>
-                            <?php echo Yii::t('csv/default', 'UPDATE_PRODUCTS', $importer->stats['update']); ?>
-                            <br/>
-                            <?php echo Yii::t('csv/default', 'DELETED_PRODUCTS', $importer->stats['deleted']); ?>
 
+
+                <?php if (Yii::$app->session->hasFlash('import-state')) { ?>
+                    <div class="form-group">
+                        <div class="alert alert-info">
+                            <?php
+                            foreach (Yii::$app->session->getFlash('import-state') as $flash) {
+                                echo '<div>' . $flash . '</div>';
+                            }
+                            ?>
                         </div>
                     </div>
                 <?php } ?>
+
 
                 <?php
                 $form = ActiveForm::begin([
