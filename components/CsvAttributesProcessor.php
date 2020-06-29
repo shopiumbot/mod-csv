@@ -44,11 +44,11 @@ class CsvAttributesProcessor extends Component
         'wholesale_prices',
         'Описание',
         'unit',
-        'Количество',
         'switch',
         'Количество',
         'currency',
-        'custom_id'
+        'custom_id',
+        'Наличие'
     ];
 
     /**
