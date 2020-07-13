@@ -687,21 +687,21 @@ class CsvImporter extends Component
         $shop_config = Yii::$app->settings->get('shop');
 
         $attributes['custom_id'] = 'Пользовательский идентификатор';
-        $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
         $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
-        $attributes['Категория'] = Yii::t('app/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
-        $attributes['Доп. Категории'] = Yii::t('app/default', 'Доп. категории разделяются точкой с запятой <code>;</code>. На пример <code>MyCategory;MyCategory/MyCategorySub</code>.');
-        $attributes['Бренд'] = Yii::t('app/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
+        $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
+        $attributes['Категория'] = Yii::t('csv/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
+        $attributes['Доп. Категории'] = Yii::t('csv/default', 'Доп. категории разделяются точкой с запятой <code>;</code>. На пример <code>MyCategory;MyCategory/MyCategorySub</code>.');
+        $attributes['Бренд'] = Yii::t('csv/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
         $attributes['Артикул'] = Yii::t('shop/Product', 'SKU');
         $attributes['Валюта'] = Yii::t('shop/Product', 'CURRENCY_ID');
         $attributes['Цена'] = Yii::t('shop/Product', 'PRICE');
         $attributes['wholesale_prices'] = Yii::t('csv/default', 'WHOLESALE_PRICE');
         $attributes['unit'] = Yii::t('shop/Product', 'UNIT') . '<br/>' . $units;
-        $attributes['switch'] = Yii::t('app/default', 'Скрыть или показать. Принимает значение <code>1</code> - показать <code>0</code> - скрыть.');
-        $attributes['Фото'] = Yii::t('app/default', 'Изображение (можно указать несколько изображений). Пример: <code>pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code>;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
-        $attributes['Описание'] = Yii::t('app/default', 'Полное описание HTML');
-        $attributes['Количество'] = Yii::t('app/default', 'Количество на складе.<br/>По умолчанию <code>1</code>, от 0 до 99999');
-        $attributes['Наличие'] = Yii::t('app/default', 'Доступность. Принимает значение <code>1</code> - есть на складе, <code>2</code> - нет на складе, <code>3</code> - под заказ.<br/>По умолчанию<code>1</code> - есть на складе');
+        $attributes['switch'] = Yii::t('csv/default', 'Скрыть или показать. Принимает значение <code>1</code> &mdash; показать <code>0</code> - скрыть.');
+        $attributes['Фото'] = Yii::t('csv/default', 'Изображение (можно указать несколько изображений). Пример: <code>pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code>;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
+        $attributes['Описание'] = Yii::t('csv/default', 'Полное описание HTML');
+        $attributes['Количество'] = Yii::t('csv/default', 'Количество на складе.<br/>По умолчанию <code>1</code>, от 0 до 99999');
+        $attributes['Наличие'] = Yii::t('csv/default', 'Доступность.<br/><code>1</code> &mdash; есть на складе,<br/><code>2</code> &mdash; нет на складе,<br/><code>3</code> &mdash; под заказ.<br/>По умолчанию <code>1</code> &mdash; есть на складе');
         //$attributes['created_at'] = Yii::t('app/default', 'Дата создания');
         // $attributes['updated_at'] = Yii::t('app/default', 'Дата обновления');
         foreach (Attribute::find()->asArray()->all() as $attr) {
@@ -715,32 +715,28 @@ class CsvImporter extends Component
 
         $units = '';
         foreach ((new Product)->getUnits() as $id => $unit) {
-            $units .= '<code style="font-size: inherit">' . $unit . '</code><br/>';
+            $units .= '<code>' . $unit . '</code><br/>';
         }
         $attributes = [];
         $shop_config = Yii::$app->settings->get('shop');
 
         $attributes['custom_id'] = 'Пользовательский идентификатор';
-
+        $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
         if (!Yii::$app->settings->get('csv', 'use_type')) {
             $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
         }
-        //if (!$shop_config['auto_gen_url']) {
-        $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
-        // }
-
-        $attributes['Категория'] = Yii::t('app/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
-        $attributes['Доп. Категории'] = Yii::t('app/default', 'Доп. Категории разделяются точкой с запятой <code style="font-size: inherit">;</code><br/>Например &mdash; <code style="font-size: inherit">MyCategory;MyCategory/MyCategorySub</code>.');
-        $attributes['Бренд'] = Yii::t('app/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
+        $attributes['Категория'] = Yii::t('csv/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
+        $attributes['Доп. Категории'] = Yii::t('csv/default', 'Доп. Категории разделяются точкой с запятой <code>;</code><br/>Например &mdash; <code>MyCategory;MyCategory/MyCategorySub</code>.');
+        $attributes['Бренд'] = Yii::t('csv/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
         $attributes['Артикул'] = Yii::t('shop/Product', 'SKU');
         $attributes['Валюта'] = Yii::t('shop/Product', 'CURRENCY_ID');
         $attributes['Цена'] = Yii::t('shop/Product', 'PRICE');
         $attributes['wholesale_prices'] = Yii::t('csv/default', 'WHOLESALE_PRICE');
         $attributes['unit'] = Yii::t('shop/Product', 'UNIT') . '<br/>' . $units;
-        $attributes['switch'] = Yii::t('app/default', 'Скрыть или показать. Принимает значение<br/><code style="font-size: inherit">1</code> &mdash; показать<br/><code style="font-size: inherit">0</code> &mdash; скрыть');
-        $attributes['Фото'] = Yii::t('app/default', 'Изображение (можно указать несколько изображений). Пример: <code style="font-size: inherit">pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code style="font-size: inherit">;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
-        $attributes['Количество'] = Yii::t('app/default', 'Количество на складе.<br/>По умолчанию &mdash; <code style="font-size: inherit">1</code>, от 0 до 99999');
-        $attributes['Наличие'] = Yii::t('app/default', 'Наличие.<br/>Принимает значение<br/><code style="font-size: inherit">1</code> &mdash; есть на складе <strong>(default)</strong><br/><code style="font-size: inherit">2</code> &mdash; нет на складе<br/><code style="font-size: inherit">3</code> &mdash; под заказ.');
+        $attributes['switch'] = Yii::t('csv/default', 'Скрыть или показать. Принимает значение<br/><code>1</code> &mdash; показать<br/><code>0</code> &mdash; скрыть');
+        $attributes['Фото'] = Yii::t('csv/default', 'Изображение (можно указать несколько изображений). Пример: <code>pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code>;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
+        $attributes['Количество'] = Yii::t('csv/default', 'Количество на складе.<br/>По умолчанию &mdash; <code>1</code>, от 0 до 99999');
+        $attributes['Наличие'] = Yii::t('csv/default', 'Наличие.<br/>Принимает значение<br/><code>1</code> &mdash; есть на складе <strong>(default)</strong><br/><code>2</code> &mdash; нет на складе<br/><code>3</code> &mdash; под заказ.');
         //$attributes['created_at'] = Yii::t('app/default', 'Дата создания');
         //$attributes['updated_at'] = Yii::t('app/default', 'Дата обновления');
         if ($type_id) {
