@@ -30,7 +30,7 @@ class CsvAttributesProcessor extends Component
     /**
      * @var array
      */
-    public $skipNames = [
+    const skipNames = [
         'Наименование',
         'Артикул',
         'Категория',
@@ -87,14 +87,14 @@ class CsvAttributesProcessor extends Component
 
         foreach ($this->data as $key => $val) {
             try {
-                if (!in_array($key, $this->skipNames) && !empty($val)) {
+                if (!in_array($key, self::skipNames) && !empty($val)) {
                     $this->model->$key = $val;
 
                 }
 
             } catch (Exception $e) {
                 // Process eav
-                if (!in_array($key, $this->skipNames) && !empty($val)) {
+                if (!in_array($key, self::skipNames) && !empty($val)) {
 
                     //if (substr($key, 0, 4) === 'eav_')
                     //    $key = substr($key, 4);

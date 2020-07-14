@@ -119,6 +119,8 @@ class CsvImporter extends Component
 
     public $totalProductCount = 0;
 
+    public $external;
+
     /**
      * @return bool validate csv file
      */
@@ -144,7 +146,27 @@ class CsvImporter extends Component
         $line = fgets($file);
         $this->csv_columns = str_getcsv($line, $this->delimiter, $this->enclosure);
 
-        foreach ($this->required as $column) { //'name', 'type', 
+        //Проверка чтобы небыло атрибутов с таким же названием как и системные параметры
+        $i = 1;
+
+        foreach ($this->getImportableAttributes('eav_') as $key => $value) {
+            if (mb_strpos($key, 'eav_')!==false) {
+                $attributeName = str_replace('eav_', '', $key);
+                if (in_array($attributeName, CsvAttributesProcessor::skipNames)) {
+                    $this->errors[] = [
+                        'line' => 0,
+                        'error' => Yii::t('csv/default', 'ERROR_COLUMN_ATTRIBUTE', [
+                            'attribute' => $attributeName
+                        ])
+                    ];
+                    return false;
+                }
+            }
+            $i++;
+        }
+
+
+        foreach ($this->required as $column) {
             if (!in_array($column, $this->csv_columns))
                 $this->errors[] = [
                     'line' => 0,
@@ -155,7 +177,6 @@ class CsvImporter extends Component
         return !$this->hasErrors();
     }
 
-    public $external;
 
     /**
      * Here we go
@@ -168,11 +189,9 @@ class CsvImporter extends Component
         $this->line = 1;
         $this->external = new ExternalFinder('{{%csv}}');
         while (($row = fgetcsv($file, $this->maxRowLength, $this->delimiter, $this->enclosure)) !== false) {
-
             $row = $this->prepareRow($row);
             $this->line++;
             $this->importRow($row);
-
         }
     }
 
@@ -366,14 +385,14 @@ class CsvImporter extends Component
                                         }
                                         if ($result) {
                                             $this->external->createExternalId(ExternalFinder::OBJECT_IMAGE, $result->id, $model->id . '_' . basename($im));
-                                        }else{
+                                        } else {
                                             $this->errors[] = [
                                                 'line' => $this->line,
                                                 'error' => 'Ошибка изображения 0001'
                                             ];
                                         }
                                     } else {
-                                        $this->errors[] = [
+                                        $this->warnings[] = [
                                             'line' => $this->line,
                                             'error' => 'Ошибка изображения'
                                         ];
@@ -578,7 +597,7 @@ class CsvImporter extends Component
         // Cache category id
         $this->categoriesPathCache[$path] = $model->id;
 
-        if (isset($model)){
+        if (isset($model)) {
             return $model->id;
         }
 
@@ -681,7 +700,7 @@ class CsvImporter extends Component
         $attributes = [];
         $units = '';
         foreach ((new Product)->getUnits() as $id => $unit) {
-            $units .= '<code style="font-size: inherit">' . $unit . '</code><br/>';
+            $units .= '<code>' . $unit . '</code><br/>';
         }
 
         $shop_config = Yii::$app->settings->get('shop');

@@ -89,7 +89,7 @@ class DefaultController extends AdminController
                 'pageSize' => 10,
             ],
             'sort' => [
-                'attributes' => ['id', 'name'],
+                'attributes' => ['name', 'img'],
             ],
         ]);
 
@@ -136,12 +136,12 @@ class DefaultController extends AdminController
 
                 $importer->file = $model->file_csv->tempName;
 
-
+                $errImport = 0;
+                $wrnImport = 0;
                 if ($importer->validate() && !$importer->hasErrors()) {
                     Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_IMPORT'));
                     $importer->import();
-                    $errImport = 0;
-                    $wrnImport = 0;
+
                     foreach ($importer->getErrors() as $error) {
 
                         if ($errImport < 10) {
@@ -173,21 +173,34 @@ class DefaultController extends AdminController
                     }
 
 
+                    if ($importer->stats['create'] > 0) {
+                        Yii::$app->session->addFlash('import-state', Yii::t('csv/default', 'CREATE_PRODUCTS', $importer->stats['create']));
+                    }
+                    if ($importer->stats['update'] > 0) {
+                        Yii::$app->session->addFlash('import-state', Yii::t('csv/default', 'UPDATE_PRODUCTS', $importer->stats['update']));
+                    }
+                    if ($importer->stats['deleted'] > 0) {
+                        Yii::$app->session->addFlash('import-state', Yii::t('csv/default', 'DELETED_PRODUCTS', $importer->stats['deleted']));
+                    }
 
 
-                        if ($importer->stats['create'] > 0) {
-                            Yii::$app->session->addFlash('import-state', Yii::t('csv/default', 'CREATE_PRODUCTS', $importer->stats['create']));
+                } else {
+                    foreach ($importer->getErrors() as $error) {
+
+                        if ($errImport < 10) {
+                            if ($error['line'] > 0)
+                                Yii::$app->session->addFlash('import-error', Yii::t('csv/default', 'LINE') . ": " . $error['line'] . ". " . $error['error']);
+                            else
+                                Yii::$app->session->addFlash('import-error', $error['error']);
+                        } else {
+                            $n = count($importer->getErrors()) - $errImport;
+                            Yii::$app->session->addFlash('import-error', Yii::t('csv/default', 'AND_MORE', $n));
+                            break;
                         }
-                        if ($importer->stats['update'] > 0) {
-                            Yii::$app->session->addFlash('import-state', Yii::t('csv/default', 'UPDATE_PRODUCTS', $importer->stats['update']));
-                        }
-                        if ($importer->stats['deleted'] > 0) {
-                            Yii::$app->session->addFlash('import-state', Yii::t('csv/default', 'DELETED_PRODUCTS', $importer->stats['deleted']));
-                        }
-
-
-                    return $this->refresh();
+                        $errImport++;
+                    }
                 }
+                return $this->refresh();
             }
 
         }

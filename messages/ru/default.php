@@ -24,6 +24,7 @@ return [
     'REMOVE_IMAGES' => 'Удалить загруженные картинки',
     'ERROR_FILE' => 'Файл недоступен.',
     'SUCCESS_UPLOAD_IMAGES' => 'Вы успешно загрузили изображения',
+    'ERROR_COLUMN_ATTRIBUTE'=>'Атрибут <strong>{attribute}</strong> используеться основым параметром товаров.',
     'ERROR_IMAGE' => 'Ошибка в изображениях.',
     'ERROR_IMAGE_EXTENSION' => 'Неверный формат файла, доступные форматы: <strong>{0}</strong>',
     'REQUIRE_COLUMN' => 'Укажите обязательную колонку {column}.',

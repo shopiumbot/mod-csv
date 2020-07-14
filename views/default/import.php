@@ -2,6 +2,7 @@
 use panix\engine\Html;
 use panix\engine\bootstrap\ActiveForm;
 use panix\engine\CMS;
+use yii\widgets\Pjax;
 
 /**
  * @var $importer \shopium\mod\csv\components\CsvImporter
@@ -22,8 +23,19 @@ use panix\engine\CMS;
             </div>
             <div class="card-body">
 
-                <div class="alert alert-warning"><?= Yii::t('csv/default', 'IMPORT_ALERT'); ?></div>
+                <div class="alert alert-info"><?= Yii::t('csv/default', 'IMPORT_ALERT'); ?></div>
 
+                <?php if (Yii::$app->session->hasFlash('import-state')) { ?>
+                    <div class="form-group">
+                        <div class="alert alert-success">
+                            <?php
+                            foreach (Yii::$app->session->getFlash('import-state') as $flash) {
+                                echo '<div>' . $flash . '</div>';
+                            }
+                            ?>
+                        </div>
+                    </div>
+                <?php } ?>
 
                 <?php if (Yii::$app->session->hasFlash('import-error')) { ?>
                     <div class="form-group">
@@ -57,17 +69,6 @@ use panix\engine\CMS;
                 <?php } ?>
 
 
-                <?php if (Yii::$app->session->hasFlash('import-state')) { ?>
-                    <div class="form-group">
-                        <div class="alert alert-info">
-                            <?php
-                            foreach (Yii::$app->session->getFlash('import-state') as $flash) {
-                                echo '<div>' . $flash . '</div>';
-                            }
-                            ?>
-                        </div>
-                    </div>
-                <?php } ?>
 
 
                 <?php
@@ -136,28 +137,48 @@ use panix\engine\CMS;
                 </div>
                 <?php ActiveForm::end(); ?>
 
+                <?php
+                Pjax::begin();
 
-                <?= \panix\engine\grid\GridView::widget([
+
+
+
+                /*$filesData = new \shopium\mod\csv\components\CsvDataProvider([
+                    'filename' => Yii::getAlias('@runtime/tmp.csv'),
+
+                ]);*/
+
+
+
+                echo \panix\engine\grid\GridView::widget([
                     'enableLayout' => false,
                     //'layoutPath' => '@user/views/layouts/_grid_layout',
                     'dataProvider' => $filesData,
                     'layoutOptions' => ['title' => 'Изображения для импорта'],
                     'columns' => [
-                        ['class' => 'yii\grid\SerialColumn'],
+                        [
+                            'class' => 'yii\grid\SerialColumn',
+                            'contentOptions' => ['class' => 'text-center'],
+                            'headerOptions' => ['class' => 'text-center']
+                        ],
                         [
                             'attribute' => 'img',
+                            'header' => 'Фото',
                             'format' => 'raw',
+                            'headerOptions' => ['class' => 'text-center'],
                             'contentOptions' => ['class' => 'text-center']
 
                         ],
                         [
                             'attribute' => 'name',
+                            'header' => 'Имя файла',
                             'format' => 'raw',
                         ],
                         [
                             'class' => \yii\grid\ActionColumn::class,
                             'template' => '{delete}',
                             'contentOptions' => ['class' => 'text-center'],
+                            'headerOptions' => ['class' => 'text-center'],
                             'header' => Yii::t('app/default', 'OPTIONS'),
                             'buttons' => [
                                 'delete' => function ($url, $model) {
@@ -166,7 +187,10 @@ use panix\engine\CMS;
                             ]
                         ],
                     ]
-                ]); ?>
+                ]);
+                Pjax::end();
+
+                ?>
             </div>
         </div>
 
@@ -176,21 +200,8 @@ use panix\engine\CMS;
                 <h5>Описание</h5>
             </div>
             <div class="card-body">
-
-                <?php
-                $shop_config = Yii::$app->settings->get('shop');
-                if (isset($shop_config->auto_gen_url)) {
-                    ?>
-                    <div class="form-group">
-                        <div class="alert alert-warning">
-                            Интернет магазин использует функцию авто генерации название товара
-                        </div>
-                    </div>
-                <?php } ?>
                 <?php
                 $groups = [];
-
-
                 foreach ($importer->getImportableAttributes('eav_') as $k => $v) {
                     if (strpos($k, 'eav_') === false) {
                         $groups['Основные'][$k] = $v;
@@ -199,15 +210,11 @@ use panix\engine\CMS;
                     }
                 }
                 ?>
-
-
                 <table class="table table-striped table-bordered">
-                    <thead>
                     <tr>
                         <th><?= Yii::t('app/default', 'NAME') ?></th>
                         <th><?= Yii::t('app/default', 'DESCRIPTION') ?></th>
                     </tr>
-                    </thead>
                     <?php foreach ($groups as $groupName => $group) { ?>
                         <tr>
                             <th colspan="2" class="text-center"><?= $groupName; ?></th>
@@ -216,9 +223,7 @@ use panix\engine\CMS;
                             $value = in_array($k, $importer->required) ? $k . ' <span class="required">*</span>' : $k;
                             ?>
                             <tr>
-                                <td width="200px"><code
-                                            style="font-size: inherit"><?= str_replace('eav_', '', $value); ?></code>
-                                </td>
+                                <td width="200px"><code><?= str_replace('eav_', '', $value); ?></code></td>
                                 <td><?= $v; ?></td>
                             </tr>
                         <?php } ?>
