@@ -22,7 +22,7 @@ class CsvExporter
     /**
      * @var string
      */
-    public $delimiter = ";";
+    public $delimiter = ",";
 
     /**
      * @var string

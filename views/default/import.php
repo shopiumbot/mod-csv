@@ -97,8 +97,8 @@ use yii\widgets\Pjax;
                         <div class="importDescription alert alert-info">
                             <ul>
                                 <li><?= Yii::t('csv/default', 'IMPORT_INFO1') ?></li>
-                                <li><?= Yii::t('csv/default', 'IMPORT_INFO2') ?></li>
-                                <li><?= Yii::t('csv/default', 'IMPORT_INFO3', ['req' => implode(', ', $importer->required)]) ?></li>
+                                <li><?= Yii::t('csv/default', 'IMPORT_INFO2',implode(', ', $importer->required)) ?></li>
+                                <li><?= Yii::t('csv/default', 'IMPORT_INFO3',$importer->delimiter) ?></li>
                                 <li><?= Yii::t('csv/default', 'IMPORT_INFO4') ?></li>
                             </ul>
                             <br/>
