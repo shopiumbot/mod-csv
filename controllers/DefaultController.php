@@ -121,7 +121,7 @@ class DefaultController extends AdminController
                 } elseif (in_array($uploadModel->files->extension, $importer::$extension)) {
                     $filePath = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . $uploadModel->files->name;
                     $uploadModel->files->saveAs($filePath);
-                    Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES') . $filePath);
+                    Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES'));
                 }
                 return $this->redirect(['import']);
             }
