@@ -10,10 +10,14 @@ use yii\widgets\Pjax;
 
 ?>
 
-<?php if (Yii::$app->session->hasFlash('success')) { ?>
-
-    <div class="alert alert-success"><?= Yii::$app->session->getFlash('success'); ?></div>
-
+<?php if (Yii::$app->session->hasFlash('success') && $flashed = Yii::$app->session->getFlash('success')) { ?>
+    <?php if (is_array($flashed)) { ?>
+        <?php foreach ($flashed as $flash) { ?>
+            <div class="alert alert-success"><?= $flash; ?></div>
+        <?php } ?>
+    <?php } else { ?>
+        <div class="alert alert-success"><?= $flashed; ?></div>
+    <?php } ?>
 <?php } ?>
 <div class="row">
     <div class="col-lg-6">
@@ -97,8 +101,8 @@ use yii\widgets\Pjax;
                         <div class="importDescription alert alert-info">
                             <ul>
                                 <li><?= Yii::t('csv/default', 'IMPORT_INFO1') ?></li>
-                                <li><?= Yii::t('csv/default', 'IMPORT_INFO2',implode(', ', $importer->required)) ?></li>
-                                <li><?= Yii::t('csv/default', 'IMPORT_INFO3',$importer->delimiter) ?></li>
+                                <li><?= Yii::t('csv/default', 'IMPORT_INFO2', implode(', ', $importer->required)) ?></li>
+                                <li><?= Yii::t('csv/default', 'IMPORT_INFO3', $importer->delimiter) ?></li>
                                 <li><?= Yii::t('csv/default', 'IMPORT_INFO4') ?></li>
                             </ul>
                             <br/>
@@ -141,13 +145,10 @@ use yii\widgets\Pjax;
                 Pjax::begin();
 
 
-
-
                 /*$filesData = new \shopium\mod\csv\components\CsvDataProvider([
                     'filename' => Yii::getAlias('@runtime/tmp.csv'),
 
                 ]);*/
-
 
 
                 echo \panix\engine\grid\GridView::widget([
