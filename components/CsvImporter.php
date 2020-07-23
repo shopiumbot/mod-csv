@@ -720,7 +720,7 @@ class CsvImporter extends Component
         $attributes['Фото'] = Yii::t('csv/default', 'Изображение (можно указать несколько изображений). Пример: <code>pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code>;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
         $attributes['Описание'] = Yii::t('csv/default', 'Полное описание HTML');
         $attributes['Количество'] = Yii::t('csv/default', 'Количество на складе.<br/>По умолчанию <code>1</code>, от 0 до 99999');
-        $attributes['Наличие'] = Yii::t('csv/default', 'Доступность.<br/><code>1</code> &mdash; есть на складе,<br/><code>2</code> &mdash; нет на складе,<br/><code>3</code> &mdash; под заказ.<br/>По умолчанию <code>1</code> &mdash; есть на складе');
+        $attributes['Наличие'] = Yii::t('csv/default', 'Доступность.<br/><code>1</code> &mdash; есть в наличие <strong>(по умолчанию)</strong><br/><code>2</code> &mdash; под заказ<br/><code>3</code> &mdash; нет в наличие.');
         //$attributes['created_at'] = Yii::t('app/default', 'Дата создания');
         // $attributes['updated_at'] = Yii::t('app/default', 'Дата обновления');
         foreach (Attribute::find()->asArray()->all() as $attr) {
@@ -755,7 +755,7 @@ class CsvImporter extends Component
         $attributes['switch'] = Yii::t('csv/default', 'Скрыть или показать. Принимает значение<br/><code>1</code> &mdash; показать<br/><code>0</code> &mdash; скрыть');
         $attributes['Фото'] = Yii::t('csv/default', 'Изображение (можно указать несколько изображений). Пример: <code>pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code>;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
         $attributes['Количество'] = Yii::t('csv/default', 'Количество на складе.<br/>По умолчанию &mdash; <code>1</code>, от 0 до 99999');
-        $attributes['Наличие'] = Yii::t('csv/default', 'Наличие.<br/>Принимает значение<br/><code>1</code> &mdash; есть на складе <strong>(default)</strong><br/><code>2</code> &mdash; нет на складе<br/><code>3</code> &mdash; под заказ.');
+        $attributes['Наличие'] = Yii::t('csv/default', 'Наличие.<br/>Принимает значение<br/><code>1</code> &mdash; есть в наличие <strong>(default)</strong><br/><code>2</code> &mdash; под заказ<br/><code>3</code> &mdash; нет в наличие');
         //$attributes['created_at'] = Yii::t('app/default', 'Дата создания');
         //$attributes['updated_at'] = Yii::t('app/default', 'Дата обновления');
         if ($type_id) {

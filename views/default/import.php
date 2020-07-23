@@ -7,12 +7,6 @@ use yii\widgets\Pjax;
 /**
  * @var $importer \shopium\mod\csv\components\CsvImporter
  */
-$filePath = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . '3434.jpg';
-if(file_exists($filePath)){
-    echo $filePath.' exist ';
-
-}
-
 ?>
 
 <?php if (Yii::$app->session->hasFlash('success') && $flashed = Yii::$app->session->getFlash('success')) { ?>
