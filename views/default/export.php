@@ -4,11 +4,12 @@ use core\modules\shop\models\Manufacturer;
 use core\modules\shop\models\ProductType;
 use yii\helpers\ArrayHelper;
 use panix\engine\bootstrap\ActiveForm;
+use shopium\mod\csv\components\AttributesProcessor;
 
 /**
  * @var $pages \panix\engine\data\Pagination
  * @var $query \shopium\mod\shop\models\query\ProductQuery
- * @var $importer \shopium\mod\csv\components\CsvImporter
+ * @var $importer \shopium\mod\csv\components\Importer
  */
 
 $this->registerJs('
@@ -34,6 +35,7 @@ $this->registerJs('
         $form = ActiveForm::begin(['id' => 'csv-form', 'method' => 'GET']);
         echo $form->field($model, 'manufacturer_id')->dropDownList(ArrayHelper::map(Manufacturer::find()->all(), 'id', 'name'), ['prompt' => '-']);
         echo $form->field($model, 'type_id')->dropDownList(ArrayHelper::map(ProductType::find()->all(), 'id', 'name'), ['prompt' => '-']);
+        echo $form->field($model, 'format')->dropDownList(['csv'=>'csv','xls'=>'xls','xlsx'=>'xlsx']);
 
         ?>
         <?php if ($count) { ?>
@@ -61,7 +63,9 @@ $this->registerJs('
         <?php } ?>
         <?php
         $groups = [];
-        foreach ($importer->getExportAttributes('eav_', Yii::$app->request->get('type_id')) as $k => $v) {
+
+        foreach (AttributesProcessor::getImportExportData('eav_', Yii::$app->request->get('type_id')) as $k => $v) {
+        //foreach ($importer->getExportAttributes('eav_', Yii::$app->request->get('type_id')) as $k => $v) {
             if (strpos($k, 'eav_') === false) {
                 $groups['Основные'][$k] = $v;
             } else {
@@ -84,7 +88,7 @@ $this->registerJs('
                         <th colspan="3" class="text-center"><?= $groupName; ?></th>
                     </tr>
                     <?php foreach ($group as $k => $v) {
-                        $dis = (in_array($k, (new \shopium\mod\csv\components\CsvImporter)->required)) ? true : false;
+                        $dis = (in_array($k, (new \shopium\mod\csv\components\Importer)->required)) ? true : false;
                         //,'readonly'=>$dis,'disabled'=>$dis
                         ?>
                         <tr>
@@ -92,7 +96,7 @@ $this->registerJs('
                                 <?= Html::checkbox('attributes[]', true, ['value' => $k]); ?>
 
                             </td>
-                            <td><code style="font-size: inherit"><?= Html::encode($k); ?></code></td>
+                            <td><code style="font-size: inherit"><?= Html::encode(str_replace('eav_', '', $k)); ?></code></td>
                             <td><?= $v; ?></td>
                         </tr>
                     <?php } ?>

@@ -18,11 +18,12 @@ class FilterForm extends Model
 
     public $type_id;
     public $manufacturer_id;
+    public $format;
 
     public function rules()
     {
         return [
-            [['type_id'], 'required'],
+            [['type_id','format'], 'required'],
             [['manufacturer_id'], 'integer'],
 
         ];
@@ -32,7 +33,8 @@ class FilterForm extends Model
     {
         return [
             'type_id' => Yii::t('shop/Product', 'TYPE_ID'),
-            'manufacturer_id' => Yii::t('shop/Product', 'MANUFACTURER_ID')
+            'manufacturer_id' => Yii::t('shop/Product', 'MANUFACTURER_ID'),
+            'format' => Yii::t('csv/default', 'EXPORT_FORMAT'),
         ];
     }
 }

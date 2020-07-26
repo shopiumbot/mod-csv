@@ -3,10 +3,38 @@ use panix\engine\Html;
 use panix\engine\bootstrap\ActiveForm;
 use panix\engine\CMS;
 use yii\widgets\Pjax;
-
+use shopium\mod\csv\components\AttributesProcessor;
 /**
- * @var $importer \shopium\mod\csv\components\CsvImporter
+ * @var $importer \shopium\mod\csv\components\Importer
  */
+/*
+$inputFileName = Yii::getAlias('@runtime').DIRECTORY_SEPARATOR.'tmp.xlsx';
+
+$inputFileName = Yii::getAlias('@runtime').DIRECTORY_SEPARATOR.'tmp.csv';
+$spreadsheet  = \PhpOffice\PhpSpreadsheet\IOFactory::load($inputFileName);
+$worksheet = $spreadsheet->getActiveSheet();
+
+$rows = [];
+$cellsHeaders = [];
+foreach ($worksheet->getRowIterator(1,1) as $row) {
+    $cellIterator2 = $row->getCellIterator();
+    $cellIterator2->setIterateOnlyExistingCells(false); // This loops through all cells,
+    foreach ($cellIterator2 as $k=>$cell2) {
+        $cellsHeaders[$k] = $cell2->getValue();
+    }
+
+}
+foreach ($worksheet->getRowIterator(2) as $row) {
+    $cellIterator = $row->getCellIterator();
+    $cellIterator->setIterateOnlyExistingCells(false); // This loops through all cells,
+    $cells = [];
+    foreach ($cellIterator as $k=>$cell) {
+        $cells[$cellsHeaders[$k]] = $cell->getValue();
+    }
+    $rows[] = $cells;
+}
+
+CMS::dump($rows);die;*/
 ?>
 
 <?php if (Yii::$app->session->hasFlash('success') && $flashed = Yii::$app->session->getFlash('success')) { ?>
@@ -86,7 +114,9 @@ use yii\widgets\Pjax;
                         ],
                     ]
                 ]);
-                echo $form->field($model, 'file_csv')->fileInput(['multiple' => false])->hint(Yii::t('csv/default', 'MAX_FILE_SIZE', CMS::fileSize($model::file_csv_max_size)));
+                echo $form->field($model, 'filename')
+                    ->fileInput(['multiple' => false])
+                    ->hint(Yii::t('csv/default', 'FILE_INPUT_HINT', [CMS::fileSize($model::file_csv_max_size), implode(', ', $model::$extension)]));
                 echo $form->field($model, 'remove_images')->checkbox([]);
                 //echo $form->field($model, 'db_backup')->checkbox([]);
                 ?>
@@ -101,12 +131,23 @@ use yii\widgets\Pjax;
                             <ul>
                                 <li><?= Yii::t('csv/default', 'IMPORT_INFO1') ?></li>
                                 <li><?= Yii::t('csv/default', 'IMPORT_INFO2', implode(', ', $importer->required)) ?></li>
-                                <li><?= Yii::t('csv/default', 'IMPORT_INFO3', $importer->delimiter) ?></li>
+                                <li class="d-none"><?= Yii::t('csv/default', 'IMPORT_INFO3', $importer->delimiter) ?></li>
                                 <li><?= Yii::t('csv/default', 'IMPORT_INFO4') ?></li>
                             </ul>
                             <br/>
-                            <a class="btn btn-sm btn-primary"
-                               href="<?= \yii\helpers\Url::to('sample') ?>"><?= Yii::t('csv/default', 'EXAMPLE_FILE') ?></a>
+
+
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownSampleFile"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <?= Yii::t('csv/default', 'EXAMPLE_FILE') ?>
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownSampleFile">
+                                    <?= Html::a('CSV файл', ['sample', 'format' => 'csv'], ['class' => 'dropdown-item']); ?>
+                                    <?= Html::a('XLS файл', ['sample', 'format' => 'xls'], ['class' => 'dropdown-item']); ?>
+                                    <?= Html::a('XLSX файл', ['sample', 'format' => 'xlsx'], ['class' => 'dropdown-item']); ?>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -202,7 +243,7 @@ use yii\widgets\Pjax;
             <div class="card-body">
                 <?php
                 $groups = [];
-                foreach ($importer->getImportableAttributes('eav_') as $k => $v) {
+                foreach (AttributesProcessor::getImportExportData('eav_') as $k => $v) {
                     if (strpos($k, 'eav_') === false) {
                         $groups['Основные'][$k] = $v;
                     } else {

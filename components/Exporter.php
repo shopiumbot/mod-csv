@@ -2,16 +2,18 @@
 
 namespace shopium\mod\csv\components;
 
-
+use PhpOffice\PhpSpreadsheet\Document\Properties;
 use Yii;
 use core\modules\shop\models\Product;
 use core\modules\shop\models\Manufacturer;
 use core\modules\shop\models\ProductType;
 use panix\engine\CMS;
-use yii\helpers\Url;
-use yii\web\Response;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
 
-class CsvExporter
+class Exporter
 {
 
     /**
@@ -102,6 +104,8 @@ class CsvExporter
                     } else {
                         $value = NULL;
                     }
+                } elseif (in_array($attr, ['switch'])) {
+                    $value = $p->$attr;
                 } else {
                     $name = CMS::slug($attr);
                     $value = $p->{'eav_' . $name}['value'];
@@ -115,7 +119,7 @@ class CsvExporter
             array_push($this->rows, $row);
         }
 
-        $this->proccessOutput();
+        $this->processOutput();
     }
 
     /**
@@ -215,10 +219,11 @@ class CsvExporter
     /**
      * Create CSV file
      */
-    public function proccessOutput()
+    public function processOutput()
     {
 
         $get = Yii::$app->request->get('FilterForm');
+        $format = $get['format'] ? $get['format'] : 'csv';
         $filename = '';
         if (isset($get['manufacturer_id'])) {
             if ($get['manufacturer_id'] == 'all') {
@@ -252,26 +257,66 @@ class CsvExporter
         // $response->format = Response::FORMAT_RAW;
         // $response->charset = 'utf-8';
         // $response->headers->set('Content-Type', 'application/octet-stream; charset=utf-8');
-        header("Content-type: application/octet-stream");
-        header("Content-Disposition: attachment; filename=\"{$filename}.csv\"");
+        //  header("Content-type: application/octet-stream");
+        // header("Content-Disposition: attachment; filename=\"{$filename}.csv\"");
 
 
         // $headers = Yii::$app->response->headers;
         //  $headers->add('Pragma111', 'no-cache');
 
+        /*$ex = Helper::newSpreadsheet();
+        $ex->setSheet(0,'List');
+        $ex->addRow($this->rows[0]);
+        unset($this->rows[0]);
+        $ex->addRows($this->rows);
 
-        $csvString = '';
-        foreach ($this->rows as $row) {
+       $ex->output('My Excel');*/
+
+
+        $spreadsheet = new Spreadsheet();
+
+        $props = new Properties();
+       // $props->setTitle($filename);
+        $props->setCreator(Yii::$app->name);
+        $props->setLastModifiedBy(Yii::$app->name);
+        $props->setCompany(Yii::$app->name);
+        //$props->setDescription(iconv('CP1251','utf-8',$filename));
+       // $props->setDescription(mb_convert_encoding($filename, 'UTF-8', 'UTF-8'));
+
+
+        $props->setCategory('ExportProducts');
+        $spreadsheet->setProperties($props);
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('List');
+
+        $index = 1;
+        foreach ($this->rows as $key => $row) {
+            $alpha = 1;
             foreach ($row as $l) {
-                // $csvString .= $this->enclosure . str_replace($this->enclosure, $this->enclosure . $this->enclosure, $l) . $this->enclosure . $this->delimiter;
-                //$csvString .= $this->enclosure . str_replace($this->enclosure, $this->enclosure . $this->enclosure, mb_convert_encoding($l, 'UTF-8', 'Windows-1251')) . $this->enclosure . $this->delimiter;
-                echo $this->enclosure . str_replace($this->enclosure, $this->enclosure . $this->enclosure, $l) . $this->enclosure . $this->delimiter;
+                $sheet->setCellValue(Helper::num2alpha($alpha) . $index, $l);
+                $alpha++;
             }
-            // $csvString .= PHP_EOL;
-            echo PHP_EOL;
+            $index++;
         }
 
-        // echo $csvString;
+
+        if ($format == 'xls') {
+            $writer = new Xls($spreadsheet);
+        } elseif ($format == 'xlsx') {
+            $writer = new Xlsx($spreadsheet);
+        } else {
+            $writer = new Csv($spreadsheet);
+        }
+
+
+        //header('Content-Type: application/vnd.ms-excel');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment;filename="' . $filename . '.' . $format . '"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+
+
         die;
 
         /*return $response->sendContentAsFile($csvString, $filename . '.csv', [

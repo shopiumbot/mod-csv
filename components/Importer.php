@@ -4,6 +4,9 @@ namespace shopium\mod\csv\components;
 
 
 use core\modules\shop\components\ExternalFinder;
+use PhpOffice\PhpSpreadsheet\Document\Properties;
+use shopium\mod\csv\components\AttributesProcessor;
+use shopium\mod\csv\components\Image;
 use Yii;
 use yii\base\Component;
 use panix\engine\CMS;
@@ -16,12 +19,13 @@ use core\modules\images\behaviors\ImageBehavior;
 use core\modules\shop\models\Currency;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
+use yii\web\UploadedFile;
 
 /**
  * Import products from csv format
  * Images must be located at ./uploads/importImages
  */
-class CsvImporter extends Component
+class Importer extends Component
 {
 
     /**
@@ -40,9 +44,12 @@ class CsvImporter extends Component
     public $enclosure = '"';
 
     /**
-     * @var string path to file
+     * @var UploadedFile path to file
      */
     public $file;
+
+
+    public $newfile;
 
     /**
      * @var string encoding.
@@ -68,7 +75,7 @@ class CsvImporter extends Component
      * Columns from first line. e.g array(category, price, name, etc...)
      * @var array
      */
-    protected $csv_columns = [];
+    protected $columns = [];
 
     /**
      * @var null|Category
@@ -119,7 +126,39 @@ class CsvImporter extends Component
 
     public $totalProductCount = 0;
 
+    /**
+     * @var ExternalFinder
+     */
     public $external;
+
+    public function getFileHandler()
+    {
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($this->newfile);
+        $worksheet = $spreadsheet->getActiveSheet();
+        //$props = $spreadsheet->getProperties();
+        $rows = [];
+        $cellsHeaders = [];
+        foreach ($worksheet->getRowIterator(1, 1) as $row) {
+            $cellIterator2 = $row->getCellIterator();
+            $cellIterator2->setIterateOnlyExistingCells(false); // This loops through all cells,
+            foreach ($cellIterator2 as $k => $cell2) {
+                $cellsHeaders[$k] = $cell2->getValue();
+            }
+
+        }
+        foreach ($worksheet->getRowIterator(2) as $row) {
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false); // This loops through all cells,
+            $cells = [];
+            foreach ($cellIterator as $k => $cell) {
+                $cells[$cellsHeaders[$k]] = $cell->getValue();
+            }
+            $rows[] = $cells;
+        }
+        return [$cellsHeaders, $rows];
+
+    }
 
     /**
      * @return bool validate csv file
@@ -129,30 +168,32 @@ class CsvImporter extends Component
 
         $this->totalProductCount = Product::find()->count();
         // Check file exists and readable
-        if (is_uploaded_file($this->file)) {
-            $newDir = Yii::getAlias('@runtime') . '/tmp.csv';
-            move_uploaded_file($this->file, $newDir);
-            $this->file = $newDir;
-        } elseif (file_exists($this->file)) {
+        if (is_uploaded_file($this->file->tempName)) {
+
+            $newDir = Yii::getAlias('@runtime') . '/tmp.' . $this->file->extension;
+            move_uploaded_file($this->file->tempName, $newDir);
+            $this->newfile = $newDir;
+        } elseif (file_exists($this->file->tempName)) {
             // ok. file exists.
         } else {
             $this->errors[] = ['line' => 0, 'error' => Yii::t('csv/default', 'ERROR_FILE')];
             return false;
         }
 
-        $file = $this->getFileHandler();
+        //  $file = $this->getFileHandler();
 
+        $this->columns = $this->getFileHandler();
         // Read first line to get attributes
-        $line = fgets($file);
-        $this->csv_columns = str_getcsv($line, $this->delimiter, $this->enclosure);
+        //$line = fgets($file);
+        //$this->csv_columns = str_getcsv($line, $this->delimiter, $this->enclosure);
 
         //Проверка чтобы небыло атрибутов с таким же названием как и системные параметры
         $i = 1;
 
         foreach ($this->getImportableAttributes('eav_') as $key => $value) {
-            if (mb_strpos($key, 'eav_')!==false) {
+            if (mb_strpos($key, 'eav_') !== false) {
                 $attributeName = str_replace('eav_', '', $key);
-                if (in_array($attributeName, CsvAttributesProcessor::skipNames)) {
+                if (in_array($attributeName, AttributesProcessor::skipNames)) {
                     $this->errors[] = [
                         'line' => 0,
                         'error' => Yii::t('csv/default', 'ERROR_COLUMN_ATTRIBUTE', [
@@ -167,7 +208,7 @@ class CsvImporter extends Component
 
 
         foreach ($this->required as $column) {
-            if (!in_array($column, $this->csv_columns))
+            if (!in_array($column, $this->columns[0]))
                 $this->errors[] = [
                     'line' => 0,
                     'error' => Yii::t('csv/default', 'REQUIRE_COLUMN', ['column' => $column])
@@ -183,16 +224,21 @@ class CsvImporter extends Component
      */
     public function import()
     {
-        $file = $this->getFileHandler();
-        fgets($file); // Skip first
+        // $file = $this->getFileHandler();
+        //fgets($file); // Skip first
         // Process lines
         $this->line = 1;
         $this->external = new ExternalFinder('{{%csv}}');
-        while (($row = fgetcsv($file, $this->maxRowLength, $this->delimiter, $this->enclosure)) !== false) {
+        foreach ($this->csv_columns[1] as $row) {
             $row = $this->prepareRow($row);
             $this->line++;
             $this->importRow($row);
         }
+        /*while (($row = fgetcsv($file, $this->maxRowLength, $this->delimiter, $this->enclosure)) !== false) {
+            $row = $this->prepareRow($row);
+            $this->line++;
+            $this->importRow($row);
+        }*/
     }
 
     /**
@@ -301,7 +347,7 @@ class CsvImporter extends Component
 
 
             // Update product variables and eav attributes.
-            $attributes = new CsvAttributesProcessor($model, $data);
+            $attributes = new AttributesProcessor($model, $data);
 
             if ($model->validate()) {
 
@@ -356,39 +402,42 @@ class CsvImporter extends Component
                             ];
                         } else {
                             foreach ($imagesArray as $n => $im) {
-
-                                $externalFinderImage = $this->external->getObject(ExternalFinder::OBJECT_IMAGE, $model->id . '_' . basename($im));
+                                $imageName = $model->id . '_' . basename($im);
+                                $externalFinderImage = $this->external->getObject(ExternalFinder::OBJECT_IMAGE, $imageName);
 
                                 if (!$externalFinderImage) {
-
-
                                     $images = $model->getImages();
                                     if ($images) {
                                         foreach ($images as $image) {
-                                            $model->removeImage($image);
-                                            $externalFinderImage2 = $this->external->getObject(ExternalFinder::OBJECT_IMAGE, $model->id . '_', true, false, true);
+                                            //$mi = $model->removeImage($image);
+                                            // if ($mi) {
+                                            $externalFinderImage2 = $this->external->getObject(ExternalFinder::OBJECT_IMAGE, $imageName, true, false, true);
                                             if ($externalFinderImage2) {
+                                                $mi = $model->removeImage($image);
                                                 $externalFinderImage2->delete();
                                                 $this->external->removeByPk(ExternalFinder::OBJECT_IMAGE, $image->id);
                                             }
+                                            // }
                                         }
-
                                     }
 
-                                    $image = CsvImage::create($im);
+                                    $image = Image::create($im);
                                     if ($image) {
                                         $result = $model->attachImage($image);
 
                                         if ($this->deleteDownloadedImages) {
-
                                             $image->deleteTempFile();
                                         }
                                         if ($result) {
-                                            $this->external->createExternalId(ExternalFinder::OBJECT_IMAGE, $result->id, $model->id . '_' . basename($im));
+                                            /*$this->warnings[] = [
+                                                'line' => $this->line,
+                                                'error' => $imageName . ' ' . $result->id
+                                            ];*/
+                                            $this->external->createExternalId(ExternalFinder::OBJECT_IMAGE, $result->id, $imageName);
                                         } else {
                                             $this->errors[] = [
                                                 'line' => $this->line,
-                                                'error' => 'Ошибка изображения 0001'
+                                                'error' => 'Ошибка изображения #0001'
                                             ];
                                         }
                                     } else {
@@ -397,8 +446,6 @@ class CsvImporter extends Component
                                             'error' => 'Ошибка изображения'
                                         ];
                                     }
-
-
                                 }
                             }
                         }
@@ -628,32 +675,12 @@ class CsvImporter extends Component
     protected function prepareRow($row)
     {
         $row = array_map('trim', $row);
-        $row = array_combine($this->csv_columns, $row);
+        // $row = array_combine($this->csv_columns[1], $row);
+
         $row['created_at'] = time();
         $row['updated_at'] = time();//date('Y-m-d H:i:s');
 
         return array_filter($row); // Remove empty keys and return result
-    }
-
-    /**
-     * Read csv file.
-     * Check encoding. If !utf8 - convert.
-     * @return resource csv file
-     */
-    protected function getFileHandler()
-    {
-        $test_content = file_get_contents($this->file);
-        $is_utf8 = mb_detect_encoding($test_content, 'UTF-8', true);
-
-        if ($is_utf8 == false) {
-            // Convert all file content to utf-8 encoding
-            $content = iconv('cp1251', 'utf-8', $test_content);
-            $this->fileHandler = tmpfile();
-            fwrite($this->fileHandler, $content);
-            fseek($this->fileHandler, 0);
-        } else
-            $this->fileHandler = fopen($this->file, 'r');
-        return $this->fileHandler;
     }
 
     /**
@@ -689,87 +716,6 @@ class CsvImporter extends Component
     public function getWarnings()
     {
         return $this->warnings;
-    }
-
-    /**
-     * @param string $eav_prefix
-     * @return array
-     */
-    public function getImportableAttributes($eav_prefix = '')
-    {
-        $attributes = [];
-        $units = '';
-        foreach ((new Product)->getUnits() as $id => $unit) {
-            $units .= '<code>' . $unit . '</code><br/>';
-        }
-
-        $shop_config = Yii::$app->settings->get('shop');
-
-        $attributes['custom_id'] = 'Пользовательский идентификатор';
-        $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
-        $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
-        $attributes['Категория'] = Yii::t('csv/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
-        $attributes['Доп. Категории'] = Yii::t('csv/default', 'Доп. категории разделяются точкой с запятой <code>;</code>. На пример <code>MyCategory;MyCategory/MyCategorySub</code>.');
-        $attributes['Бренд'] = Yii::t('csv/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
-        $attributes['Артикул'] = Yii::t('shop/Product', 'SKU');
-        $attributes['Валюта'] = Yii::t('shop/Product', 'CURRENCY_ID');
-        $attributes['Цена'] = Yii::t('shop/Product', 'PRICE');
-        $attributes['wholesale_prices'] = Yii::t('csv/default', 'WHOLESALE_PRICE');
-        $attributes['unit'] = Yii::t('shop/Product', 'UNIT') . '<br/>' . $units;
-        $attributes['switch'] = Yii::t('csv/default', 'Скрыть или показать. Принимает значение <code>1</code> &mdash; показать <code>0</code> - скрыть.');
-        $attributes['Фото'] = Yii::t('csv/default', 'Изображение (можно указать несколько изображений). Пример: <code>pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code>;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
-        $attributes['Описание'] = Yii::t('csv/default', 'Полное описание HTML');
-        $attributes['Количество'] = Yii::t('csv/default', 'Количество на складе.<br/>По умолчанию <code>1</code>, от 0 до 99999');
-        $attributes['Наличие'] = Yii::t('csv/default', 'Доступность.<br/><code>1</code> &mdash; есть в наличие <strong>(по умолчанию)</strong><br/><code>2</code> &mdash; под заказ<br/><code>3</code> &mdash; нет в наличие.');
-        //$attributes['created_at'] = Yii::t('app/default', 'Дата создания');
-        // $attributes['updated_at'] = Yii::t('app/default', 'Дата обновления');
-        foreach (Attribute::find()->asArray()->all() as $attr) {
-            $attributes[$eav_prefix . $attr['title']] = $attr['title'];
-        }
-        return $attributes;
-    }
-
-    public function getExportAttributes($eav_prefix = '', $type_id)
-    {
-
-        $units = '';
-        foreach ((new Product)->getUnits() as $id => $unit) {
-            $units .= '<code>' . $unit . '</code><br/>';
-        }
-        $attributes = [];
-        $shop_config = Yii::$app->settings->get('shop');
-
-        $attributes['custom_id'] = 'Пользовательский идентификатор';
-        $attributes['Наименование'] = Yii::t('shop/Product', 'NAME');
-        if (!Yii::$app->settings->get('csv', 'use_type')) {
-            $attributes['Тип'] = Yii::t('shop/Product', 'TYPE_ID');
-        }
-        $attributes['Категория'] = Yii::t('csv/default', 'Категория. Если указанной категории не будет в базе она добавится автоматически.');
-        $attributes['Доп. Категории'] = Yii::t('csv/default', 'Доп. Категории разделяются точкой с запятой <code>;</code><br/>Например &mdash; <code>MyCategory;MyCategory/MyCategorySub</code>.');
-        $attributes['Бренд'] = Yii::t('csv/default', 'Производитель. Если указанного производителя не будет в базе он добавится автоматически.');
-        $attributes['Артикул'] = Yii::t('shop/Product', 'SKU');
-        $attributes['Валюта'] = Yii::t('shop/Product', 'CURRENCY_ID');
-        $attributes['Цена'] = Yii::t('shop/Product', 'PRICE');
-        $attributes['wholesale_prices'] = Yii::t('csv/default', 'WHOLESALE_PRICE');
-        $attributes['unit'] = Yii::t('shop/Product', 'UNIT') . '<br/>' . $units;
-        $attributes['switch'] = Yii::t('csv/default', 'Скрыть или показать. Принимает значение<br/><code>1</code> &mdash; показать<br/><code>0</code> &mdash; скрыть');
-        $attributes['Фото'] = Yii::t('csv/default', 'Изображение (можно указать несколько изображений). Пример: <code>pic1.jpg;pic2.jpg</code> разделяя название изображений символом "<code>;</code>" (точка с запятой). Первое изображение <b>pic1.jpg</b> будет являться главным. <div class="text-danger"><i class="flaticon-warning"></i> Также стоит помнить что не один из остальных товаров не должен использовать эти изображения.</div>');
-        $attributes['Количество'] = Yii::t('csv/default', 'Количество на складе.<br/>По умолчанию &mdash; <code>1</code>, от 0 до 99999');
-        $attributes['Наличие'] = Yii::t('csv/default', 'Наличие.<br/>Принимает значение<br/><code>1</code> &mdash; есть в наличие <strong>(default)</strong><br/><code>2</code> &mdash; под заказ<br/><code>3</code> &mdash; нет в наличие');
-        //$attributes['created_at'] = Yii::t('app/default', 'Дата создания');
-        //$attributes['updated_at'] = Yii::t('app/default', 'Дата обновления');
-        if ($type_id) {
-            $type = ProductType::findOne($type_id);
-            foreach ($type->shopAttributes as $attr) {
-                $attributes[$attr->title] = $attr->title;
-            }
-        } else {
-            foreach (Attribute::find()->asArray()->all() as $attr) {
-                $attributes[$attr['title']] = $attr['title'];
-            }
-        }
-
-        return $attributes;
     }
 
     /**

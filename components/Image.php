@@ -10,7 +10,7 @@ use yii\web\UploadedFile;
 /**
  * Class to make easier importing images
  */
-class CsvImage extends UploadedFile
+class Image extends UploadedFile
 {
 
     public $isDownloaded = false;
@@ -27,7 +27,7 @@ class CsvImage extends UploadedFile
 
     /**
      * @param string $image name in /uploads/ e.g. somename.jpg
-     * @return CsvImage|false
+     * @return Image|false
      */
     public static function create($image)
     {
@@ -68,7 +68,7 @@ class CsvImage extends UploadedFile
         if (!file_exists($tmpName))
             return false;
 
-        $result = new CsvImage($image, $tmpName, FileHelper::getMimeType($tmpName), filesize($tmpName), UPLOAD_ERR_OK);
+        $result = new Image($image, $tmpName, FileHelper::getMimeType($tmpName), filesize($tmpName), UPLOAD_ERR_OK);
         $result->isDownloaded = $isDownloaded;
         return $result;
 
@@ -99,8 +99,7 @@ class CsvImage extends UploadedFile
 
     }
 
-    public
-    function deleteTempFile()
+    public function deleteTempFile()
     {
         @unlink($this->tempName);
     }

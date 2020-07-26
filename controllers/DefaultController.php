@@ -2,22 +2,21 @@
 
 namespace shopium\mod\csv\controllers;
 
-
+use PhpOffice\PhpSpreadsheet\Document\Properties;
 use Yii;
 use yii\data\ArrayDataProvider;
 use yii\data\Pagination;
 use yii\helpers\FileHelper;
 use yii\web\UploadedFile;
 use panix\engine\Html;
-use panix\engine\CMS;
 use core\modules\shop\models\Product;
 use core\components\controllers\AdminController;
-
-use shopium\mod\csv\components\CsvExporter;
-use shopium\mod\csv\components\CsvImporter;
 use shopium\mod\csv\models\UploadForm;
 use shopium\mod\csv\models\FilterForm;
 use shopium\mod\csv\models\ImportForm;
+use shopium\mod\csv\components\Exporter;
+use shopium\mod\csv\components\Importer;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 ignore_user_abort(1);
 set_time_limit(0);
@@ -93,8 +92,6 @@ class DefaultController extends AdminController
             ],
         ]);
 
-        $importer = new CsvImporter;
-
 
         $model = new ImportForm();
         $uploadModel = new UploadForm();
@@ -118,7 +115,7 @@ class DefaultController extends AdminController
                             die('error 01');
                         }
                     }
-                } elseif (in_array($uploadModel->files->extension, $importer::$extension)) {
+                } elseif (in_array($uploadModel->files->extension, $uploadModel::$extension)) {
                     $filePath = Yii::getAlias(Yii::$app->getModule('csv')->uploadPath) . DIRECTORY_SEPARATOR . $uploadModel->files->name;
                     $uploadModel->files->saveAs($filePath);
                     Yii::$app->session->setFlash('success', Yii::t('csv/default', 'SUCCESS_UPLOAD_IMAGES'));
@@ -126,14 +123,17 @@ class DefaultController extends AdminController
                 return $this->redirect(['import']);
             }
         }
+
+        $importer = new Importer();
+
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+
+
+            $model->filename = UploadedFile::getInstance($model, 'filename');
             $importer->deleteDownloadedImages = $model->remove_images;
+            if ($model->filename) {
 
-
-            $model->file_csv = UploadedFile::getInstance($model, 'file_csv');
-            if ($model->file_csv) {
-
-                $importer->file = $model->file_csv->tempName;
+                $importer->file = $model->filename;
 
                 $errImport = 0;
                 $wrnImport = 0;
@@ -218,7 +218,7 @@ class DefaultController extends AdminController
     public function actionExport()
     {
         $this->pageName = Yii::t('csv/default', 'EXPORT_PRODUCTS');
-        $exporter = new CsvExporter;
+        $exporter = new Exporter();
 
         $this->buttons[] = [
             'label' => Yii::t('csv/default', 'IMPORT'),
@@ -266,31 +266,76 @@ class DefaultController extends AdminController
             'query' => $query,
             'count' => $count,
             'model' => $model,
-            'importer' => new CsvImporter,
+            'importer' => new Importer,
         ]);
     }
 
-
     /**
-     * Sample csv file
+     * Sample csv|xls|xlsx file
+     *
+     * @param string $format Default csv
+     * @return \yii\web\Response
      */
-    public function actionSample()
+    public function actionSample($format = 'csv')
     {
-        // $response = Yii::$app->response;
-        //$response->format = Response::FORMAT_RAW;
-        //$response->getHeaders()->add('Content-type', 'application/octet-stream');
-        // $response->getHeaders()->add('Content-Disposition', 'attachment; filename=sample.csv');
+        $fileName = 'sample-' . time();
+        $spreadsheet = new Spreadsheet();
 
-        $content = '"Наименование","Категория","Цена","Тип"' . PHP_EOL;
-        $content .= '"Product Name","Category/Subcategory","10.99","Product name"' . PHP_EOL;
+        $props = new Properties();
+        $props->setTitle('Sample file');
+        $props->setCreator(Yii::$app->name);
+        $props->setLastModifiedBy(Yii::$app->name);
+        $props->setCompany(Yii::$app->name);
+        $props->setDescription("This example {$format} file");
+        $props->setCategory('ImportProducts');
+        $spreadsheet->setProperties($props);
 
 
-        return \Yii::$app->response->sendContentAsFile($content, 'sample.csv', [
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('List');
+        $sheet->setCellValue('A1', 'Наименование');
+        $sheet->setCellValue('B1', 'Категория');
+        $sheet->setCellValue('C1', 'Цена');
+        $sheet->setCellValue('D1', 'Тип');
+
+
+        $sheet->setCellValue('A2', 'Product Name');
+        $sheet->setCellValue('B2', 'Category/Subcategory');
+        $sheet->setCellValue('C2', '10.99');
+        $sheet->setCellValue('D2', 'Product Type');
+
+
+        $sheet->setCellValue('A3', 'Product Name 2');
+        $sheet->setCellValue('B3', 'Category/Subcategory');
+        $sheet->setCellValue('C3', '25.99');
+        $sheet->setCellValue('D3', 'Product Type');
+
+
+        if ($format == 'xls') {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xls($spreadsheet);
+            $fileName = $fileName . '.xls';
+        } elseif ($format == 'xlsx') {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $fileName = $fileName . '.xlsx';
+        } else {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($spreadsheet);
+            $fileName = $fileName . '.csv';
+        }
+
+        $tmpFilePath = Yii::getAlias('@runtime') . DIRECTORY_SEPARATOR . $fileName;
+
+       // $writer->save('php://output');
+
+
+        $writer->save($tmpFilePath);
+        $filepath = file_get_contents($tmpFilePath);
+        unlink($tmpFilePath);
+        return \Yii::$app->response->sendContentAsFile($filepath, $fileName, [
             'mimeType' => 'application/octet-stream',
             //  'inline'   => false
         ]);
 
-        //  return $content;
     }
 
     public function getAddonsMenu()
