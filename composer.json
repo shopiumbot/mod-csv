@@ -19,7 +19,7 @@
   ],
   "require": {
     "nelexa/zip": "~3",
-    "phpoffice/phpspreadsheet": "^1.14"
+    "phpoffice/phpspreadsheet": "~1.14"
   },
   "autoload": {
     "psr-4": {
