@@ -87,6 +87,10 @@ class Exporter
                     $value = $this->getCurrency($p);
                 } elseif ($attr === 'Артикул') {
                     $value = $p->sku;
+                } elseif ($attr === 'Наличие') {
+                    $value = $p->availability;
+                } elseif ($attr === 'Количество') {
+                    $value = $p->quantity;
                 } elseif ($attr === 'wholesale_prices') {
                     $price = [];
                     $result = NULL;
@@ -137,15 +141,12 @@ class Exporter
 
             if (isset($this->categoryCache[$category->id]))
                 $this->categoryCache[$category->id];
-            // foreach($category->excludeRoot()->ancestors()->findAll() as $test){
-            //    VarDumper::dump($test->name);
-            //}
-            // die();
+
             $ancestors = $category->ancestors()->excludeRoot()->all();
             if (empty($ancestors))
                 return $category->name;
 
-            $result = array();
+            $result = [];
             foreach ($ancestors as $c)
                 array_push($result, preg_replace('/\//', '\/', $c->name));
             array_push($result, preg_replace('/\//', '\/', $category->name));
@@ -179,8 +180,11 @@ class Exporter
             }
         }
 
-        if (!empty($result))
+        if (!empty($result)){
             return implode(';', $result);
+            //return $result[array_key_last($result)];
+        }
+
         return '';
     }
 
@@ -233,36 +237,21 @@ class Exporter
                 if ($manufacturer) {
                     $filename .= $manufacturer->name . '_';
                 }
-
             }
         }
-
 
         if ($get['type_id']) {
             $type = ProductType::findOne($get['type_id']);
             if ($type) {
                 $filename .= $type->name . '_';
             }
-
         }
 
-
         $filename .= '(' . CMS::date() . ')';
-
 
         if (Yii::$app->request->get('page')) {
             $filename .= '_page-' . Yii::$app->request->get('page');
         }
-        // $response = Yii::$app->response;
-        // $response->format = Response::FORMAT_RAW;
-        // $response->charset = 'utf-8';
-        // $response->headers->set('Content-Type', 'application/octet-stream; charset=utf-8');
-        //  header("Content-type: application/octet-stream");
-        // header("Content-Disposition: attachment; filename=\"{$filename}.csv\"");
-
-
-        // $headers = Yii::$app->response->headers;
-        //  $headers->add('Pragma111', 'no-cache');
 
         /*$ex = Helper::newSpreadsheet();
         $ex->setSheet(0,'List');

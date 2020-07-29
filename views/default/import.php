@@ -131,7 +131,7 @@ CMS::dump($rows);die;*/
                             <ul>
                                 <li><?= Yii::t('csv/default', 'IMPORT_INFO1') ?></li>
                                 <li><?= Yii::t('csv/default', 'IMPORT_INFO2', implode(', ', $importer->required)) ?></li>
-                                <li class="d-none"><?= Yii::t('csv/default', 'IMPORT_INFO3', $importer->delimiter) ?></li>
+                                <li><?= Yii::t('csv/default', 'IMPORT_INFO3', $importer->delimiter) ?></li>
                                 <li><?= Yii::t('csv/default', 'IMPORT_INFO4') ?></li>
                             </ul>
                             <br/>

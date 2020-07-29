@@ -17,7 +17,7 @@ class ImportForm extends Model
 {
 
     const files_max_size = 1024 * 1024 * 50;
-    const file_csv_max_size = 1024 * 1024 * 5;
+    const file_csv_max_size = 1024 * 1024 * 2;
     /**
      * @var array
      */

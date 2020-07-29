@@ -190,7 +190,7 @@ class Importer extends Component
         //Проверка чтобы небыло атрибутов с таким же названием как и системные параметры
         $i = 1;
 
-        foreach ($this->getImportableAttributes('eav_') as $key => $value) {
+        foreach (AttributesProcessor::getImportExportData('eav_') as $key => $value) {
             if (mb_strpos($key, 'eav_') !== false) {
                 $attributeName = str_replace('eav_', '', $key);
                 if (in_array($attributeName, AttributesProcessor::skipNames)) {
@@ -229,7 +229,7 @@ class Importer extends Component
         // Process lines
         $this->line = 1;
         $this->external = new ExternalFinder('{{%csv}}');
-        foreach ($this->csv_columns[1] as $row) {
+        foreach ($this->columns[1] as $row) {
             $row = $this->prepareRow($row);
             $this->line++;
             $this->importRow($row);
