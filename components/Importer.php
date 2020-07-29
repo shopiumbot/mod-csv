@@ -122,7 +122,7 @@ class Importer extends Component
         'deleted' => 0
     ];
     public static $extension = ['jpg', 'jpeg'];
-    public $required = ['Категория', 'Цена', 'Артикул', 'Тип'];
+    public $required = ['Наименование', 'Категория', 'Цена', 'Тип'];
 
     public $totalProductCount = 0;
 
