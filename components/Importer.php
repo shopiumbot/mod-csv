@@ -34,11 +34,6 @@ class Importer extends Component
     public $delimiter = ",";
 
     /**
-     * @var int
-     */
-    public $maxRowLength = 10000;
-
-    /**
      * @var string
      */
     public $enclosure = '"';
@@ -256,15 +251,19 @@ class Importer extends Component
         $this->line = 1;
         $this->external = new ExternalFinder('{{%csv}}');
         $counter = 0;
-        foreach ($this->columns[1] as $row) {
+        foreach ($this->columns[1] as $columnIndex=>$row) {
 
-            if ($counter >= 100) {
-                if ((isset($row['Наименование']) && !empty($row['Наименование'])) || (isset($row['Цена']) || !empty($row['Цена']))) {
+           // if ($counter >= 100) {
+                if (isset($row['Наименование'], $row['Цена'], $row['Категория'], $row['Тип'])) {
+                    if(!empty($row['Наименование']) && !empty($row['Цена']) && !empty($row['Тип'])){
+
+
                     $row = $this->prepareRow($row);
-                    $this->line++;
+                    $this->line = $columnIndex;
                     $this->importRow($row);
+                    }
                 }
-            }
+           // }
             $counter++;
         }
     }
