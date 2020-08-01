@@ -15,11 +15,16 @@ class SettingsForm extends SettingsModel
     public static $category = 'csv';
 
     public $pagenum;
+    public $indent_row;
+    public $indent_column;
+    public $ignore_columns;
 
     public function rules()
     {
         return [
-            ['pagenum', 'required'],
+            [['pagenum', 'indent_row', 'indent_column'], 'required'],
+            [['indent_column', 'indent_row'], 'integer', 'min' => 1],
+            [['ignore_columns'], 'string']
         ];
     }
 
@@ -27,6 +32,9 @@ class SettingsForm extends SettingsModel
     {
         return [
             'pagenum' => 300,
+            'indent_row' => 1,
+            'indent_column' => 1,
+            'ignore_columns' => '',
         ];
     }
 }

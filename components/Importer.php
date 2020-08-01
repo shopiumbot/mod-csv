@@ -133,28 +133,56 @@ class Importer extends Component
 
     public function getFileHandler()
     {
-
+        $config = Yii::$app->settings->get('csv');
+        $indentRow = (isset($config->indent_row)) ? $config->indent_row : 1;
+        $indentColumn = (isset($config->indent_column)) ? $config->indent_column : 1;
+        $ignoreColumns = (isset($config->ignore_columns)) ? explode(',', $config->ignore_columns) : [];
         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($this->newfile);
         $worksheet = $spreadsheet->getActiveSheet();
         //$props = $spreadsheet->getProperties();
         $rows = [];
         $cellsHeaders = [];
-        foreach ($worksheet->getRowIterator(1, 1) as $row) {
-            $cellIterator2 = $row->getCellIterator();
+        foreach ($worksheet->getRowIterator($indentRow, 1) as $k => $row) {
+            $cellIterator2 = $row->getCellIterator(Helper::num2alpha($indentColumn));
             $cellIterator2->setIterateOnlyExistingCells(false); // This loops through all cells,
-            foreach ($cellIterator2 as $k => $cell2) {
-                $cellsHeaders[$k] = $cell2->getValue();
+            foreach ($cellIterator2 as $column => $cell2) {
+                $value = trim($cell2->getValue());
+                if (!in_array(mb_strtolower($column), $ignoreColumns)) {
+                    if (!empty($value)) {
+                        $cellsHeaders[$column] = $value;
+                    }
+                }
             }
 
         }
-        foreach ($worksheet->getRowIterator(2) as $row) {
-            $cellIterator = $row->getCellIterator();
+        foreach ($worksheet->getRowIterator($indentRow + 1) as $k2 => $row) {
+
+            $cellIterator = $row->getCellIterator(Helper::num2alpha($indentColumn));
             $cellIterator->setIterateOnlyExistingCells(false); // This loops through all cells,
             $cells = [];
-            foreach ($cellIterator as $k => $cell) {
-                $cells[$cellsHeaders[$k]] = $cell->getValue();
+            foreach ($cellIterator as $column2 => $cell) {
+                $value = trim($cell->getValue());
+                if (isset($cellsHeaders[$column2])) {
+                    if (!in_array(mb_strtolower($column2), $ignoreColumns)) {
+
+                        if ($cell->getDataType() == 'f') {
+                            //todo: need Re-pattern...
+                            //string: =IMAGE("https://sun9-22.userapi.com/c855128/v855128088/114004/x7FdunGhaWc.jpg",2)
+                            preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(\?\S+)?)/iu', $cell->getValue(), $match);
+                            if (isset($match[1]) && isset($match[2])) {
+                                if (mb_strtolower($match[1]) == 'image') {
+
+                                    $cells[$cellsHeaders[$column2]] = trim($match[2]);
+                                }
+                            }
+                        } else {
+                            $cells[$cellsHeaders[$column2]] = $value;
+                        }
+                    }
+                }
             }
-            $rows[] = $cells;
+
+            $rows[$k2] = $cells;
         }
         return [$cellsHeaders, $rows];
 
@@ -180,13 +208,9 @@ class Importer extends Component
             return false;
         }
 
-        //  $file = $this->getFileHandler();
-
         $this->columns = $this->getFileHandler();
-        // Read first line to get attributes
-        //$line = fgets($file);
-        //$this->csv_columns = str_getcsv($line, $this->delimiter, $this->enclosure);
 
+        // CMS::dump($this->columns[1]);
         //Проверка чтобы небыло атрибутов с таким же названием как и системные параметры
         $i = 1;
 
@@ -205,7 +229,9 @@ class Importer extends Component
             }
             $i++;
         }
-
+        //CMS::dump($this->columns[0]);
+        //CMS::dump($this->columns[1]);
+        //die;
 
         foreach ($this->required as $column) {
             if (!in_array($column, $this->columns[0]))
@@ -229,16 +255,18 @@ class Importer extends Component
         // Process lines
         $this->line = 1;
         $this->external = new ExternalFinder('{{%csv}}');
+        $counter = 0;
         foreach ($this->columns[1] as $row) {
-            $row = $this->prepareRow($row);
-            $this->line++;
-            $this->importRow($row);
+
+            if ($counter >= 100) {
+                if ((isset($row['Наименование']) && !empty($row['Наименование'])) || (isset($row['Цена']) || !empty($row['Цена']))) {
+                    $row = $this->prepareRow($row);
+                    $this->line++;
+                    $this->importRow($row);
+                }
+            }
+            $counter++;
         }
-        /*while (($row = fgetcsv($file, $this->maxRowLength, $this->delimiter, $this->enclosure)) !== false) {
-            $row = $this->prepareRow($row);
-            $this->line++;
-            $this->importRow($row);
-        }*/
     }
 
     /**
