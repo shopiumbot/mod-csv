@@ -6,16 +6,18 @@ use shopium\mod\shop\models\ProductType;
 use yii\helpers\ArrayHelper;
 
 
-
 use Google\Spreadsheet\DefaultServiceRequest;
 use Google\Spreadsheet\ServiceRequestFactory;
-putenv('GOOGLE_APPLICATION_CREDENTIALS=' . Yii::getAlias('@app') . '/secret.json');
+
 /*  SEND TO GOOGLE SHEETS */
-$client = new Google_Client;
-try{
+$client = new Google_Client([
+    'credentials' => Yii::getAlias('@app') . '/secret.json'
+]);
+try {
+
     $client->useApplicationDefaultCredentials();
     $client->setApplicationName("Something to do with my representatives");
-    $client->setScopes(['https://spreadsheets.google.com/feeds']); //'https://www.googleapis.com/auth/drive',
+    $client->setScopes(['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/spreadsheets']); //'https://www.googleapis.com/auth/drive',
     if ($client->isAccessTokenExpired()) {
         $client->refreshTokenWithAssertion();
     }
@@ -25,6 +27,7 @@ try{
         new DefaultServiceRequest($accessToken)
     );
     // Get our spreadsheet
+    //composer require asimlqt/php-google-spreadsheet-client
     $spreadsheet = (new Google\Spreadsheet\SpreadsheetService)
         ->getSpreadsheetFeed()
         ->getByTitle('MyTable');
@@ -45,33 +48,37 @@ try{
     ]);*/
 
 
-
-
-
-
-
     $service = new Google_Service_Sheets($client);
 
 // Prints the names and majors of students in a sample spreadsheet:
 // https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
     $spreadsheetId = '1AElm_JFUNoG4ifXPEvWAgebPRdcZdco3X411-hmrvfk';
+    // $spreadsheetId = '1trzaot9J3td_Q5kAorJm3SQdW5NgCP1IRg2N98c3a9c';
 
 
+    $test = $service->spreadsheets->get($spreadsheetId);
+    $sheet = $test->getSheets();
+
+    $listName = $sheet[0]->getProperties()->getTitle();
+
+    //\panix\engine\CMS::dump($sheet[0]->getProperties());die;
+//echo $test->getSpreadsheetUrl();
 
 
-    $range = 'Лист1';
+    $range = $listName . '';
+
     $values = [
         [
-            'PANIX',
-            '2425-245-224545',
-            'Orlov',
+            'Наименование',
+            'Фото',
+            'РАЗМЕРНАЯ СЕТКА',
             'Berlin',
-            '35',
+            'Описание',
             date('Y-m-d H:i:s')
         ],
         [
             'Andrew',
-            '2425-245-224545',
+            '2425fadsf3',
             'Orlov',
             'Berlin',
             '35',
@@ -80,34 +87,35 @@ try{
 
     ];
     $body = new Google_Service_Sheets_ValueRange([
-        'values' => $values
+        'values' => $values,
     ]);
     $params = [
         'valueInputOption' => 'USER_ENTERED'
     ];
 
-    $get = $service->spreadsheets_values->get($spreadsheetId, $range,[]);
+    $result = $service->spreadsheets_values->append($spreadsheetId, $range, $body, $params);
 
-    \panix\engine\CMS::dump($get->getValues());
+    $get = $service->spreadsheets_values->get($spreadsheetId, $range, []);
 
-    //$insert = $service->spreadsheets_values->append($spreadsheetId, $range, $body, $params);
+    //\panix\engine\CMS::dump($get->getValues());
 
 
-
-    $result = $service->spreadsheets_values->update($spreadsheetId, $range, $body, $params);
-    printf("%d cells updated.", $result->getUpdatedCells());
-}catch(\yii\base\Exception $e){
+    // printf("%f cells updated.", $result->getUpdates());
+//\panix\engine\CMS::dump($result->getUpdates());
+    /*$result = $service->spreadsheets_values->update($spreadsheetId, $range, $body, $params);
+    printf("%d cells updated.", $result->getUpdatedCells());*/
+} catch (\yii\base\Exception $e) {
     echo $e->getMessage() . ' ' . $e->getLine() . ' ' . $e->getFile();
 }
 
 
-$str = '=IMAGE("https://sun9-22.userapi.com/c855128/v855128088/114004/x7FdunGhaWc.jpg",2)';
+//$str = '=IMAGE("https://sun9-22.userapi.com/c855128/v855128088/114004/x7FdunGhaWc.jpg",2)';
 
 // @((https?://)?([-\\w]+\\.[-\\w\\.]+)+\\w(:\\d+)?(/([-\\w/_\\.]*(\\?\\S+)?)?)*)@
-$preg = preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(\?\S+)?)/iu',$str,$match);
+//$preg = preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(\?\S+)?)/iu',$str,$match);
 
-\panix\engine\CMS::dump($preg);
-\panix\engine\CMS::dump($match);
+//\panix\engine\CMS::dump($preg);
+//\panix\engine\CMS::dump($match);
 
 ?>
 
@@ -116,7 +124,7 @@ $preg = preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(
         <h5><?= $this->context->pageName ?></h5>
     </div>
     <?php
-    $form = ActiveForm::begin();
+    $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]);
     ?>
     <div class="card-body">
         <?= $form->field($model, 'pagenum') ?>
@@ -127,6 +135,13 @@ $preg = preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(
             ->widget(\panix\ext\taginput\TagInput::class)
             ->hint('Введите буквы и нажмите Enter');
         ?>
+        <?php if (YII_DEBUG) { ?>
+            <div class="text-center mb-4">
+                <h4>Google sheets</h4>
+            </div>
+            <?= $form->field($model, 'google_sheet_id') ?>
+            <?= $form->field($model, 'google_token')->fileInput() ?>
+        <?php } ?>
     </div>
     <div class="card-footer text-center">
         <?= $model->submitButton(); ?>
