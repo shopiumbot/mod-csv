@@ -93,9 +93,9 @@ try {
         'valueInputOption' => 'USER_ENTERED'
     ];
 
-    $result = $service->spreadsheets_values->append($spreadsheetId, $range, $body, $params);
+   // $result = $service->spreadsheets_values->append($spreadsheetId, $range, $body, $params);
 
-    $get = $service->spreadsheets_values->get($spreadsheetId, $range, []);
+   // $get = $service->spreadsheets_values->get($spreadsheetId, $range, []);
 
     //\panix\engine\CMS::dump($get->getValues());
 
@@ -107,15 +107,19 @@ try {
 } catch (\yii\base\Exception $e) {
     echo $e->getMessage() . ' ' . $e->getLine() . ' ' . $e->getFile();
 }
-
-
+$str = '=IMAGE("https://sneakerstudio.com.ua/rus_pm_%D0%96%D0%B5%D0%BD%D1%81%D0%BA%D0%B8%D0%B5-%D0%BA%D1%80%D0%BE%D1%81%D1%81%D0%BE%D0%B2%D0%BA%D0%B8-Fila-Disruptor-Low-1010302-71A-19803_2.jpg",2)';
 //$str = '=IMAGE("https://sun9-22.userapi.com/c855128/v855128088/114004/x7FdunGhaWc.jpg",2)';
+$str = '=IMAGE("https://site.com/get/folder=mydir&image=file.jpg",2)';
+//preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(\?\S+)?)/iu', $str, $match);
+preg_match('/(IMAGE).*[\'"](https?:\/\/?.*)[\'"]/iu', $str, $match);
+
+
 
 // @((https?://)?([-\\w]+\\.[-\\w\\.]+)+\\w(:\\d+)?(/([-\\w/_\\.]*(\\?\\S+)?)?)*)@
 //$preg = preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(\?\S+)?)/iu',$str,$match);
 
 //\panix\engine\CMS::dump($preg);
-//\panix\engine\CMS::dump($match);
+\panix\engine\CMS::dump($match);
 
 ?>
 

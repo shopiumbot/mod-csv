@@ -163,7 +163,10 @@ class Importer extends Component
                         if ($cell->getDataType() == 'f') {
                             //todo: need Re-pattern...
                             //string: =IMAGE("https://sun9-22.userapi.com/c855128/v855128088/114004/x7FdunGhaWc.jpg",2)
-                            preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(\?\S+)?)/iu', $cell->getValue(), $match);
+                           /// preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(\?\S+)?)/iu', $cell->getValue(), $match);
+                            ///
+                         preg_match('/(IMAGE).*[\'"](https?:\/\/?.*)[\'"]/iu', $cell->getValue(), $match);
+
                             if (isset($match[1]) && isset($match[2])) {
                                 if (mb_strtolower($match[1]) == 'image') {
 
@@ -256,7 +259,9 @@ class Importer extends Component
             // if ($counter >= 100) {
             if (isset($row['Наименование'], $row['Цена'], $row['Категория'], $row['Тип'])) {
                 if (!empty($row['Наименование']) && !empty($row['Цена']) && !empty($row['Тип'])) {
+                  //  CMS::dump($row);die;
                     $row = $this->prepareRow($row);
+
                     $this->line = $columnIndex;
                     $this->importRow($row);
                 }
@@ -416,9 +421,11 @@ class Importer extends Component
                 $model->setCategories($categories, $category_id);
 
                 if (isset($data['Фото']) && !empty($data['Фото'])) {
+
                     if ($this->validateImage($data['Фото'])) {
                         /** @var ImageBehavior $model */
                         $imagesArray = explode(';', $data['Фото']);
+
                         $limit = Yii::$app->params['plan'][Yii::$app->user->planId]['product_upload_files'];
                         if ((count($imagesArray) > $limit) || $model->imagesCount > $limit) {
                             $this->errors[] = [

@@ -1,9 +1,9 @@
 <?php
 return [
     'PAGENUM' => 'Количество товаров в файле экспорта',
-    'INDENT_ROW' => 'Отступить строку',
-    'INDENT_COLUMN' => 'Отступить столбец',
+    'INDENT_ROW' => 'Начальная строка',
+    'INDENT_COLUMN' => 'Начальный столбец',
     'IGNORE_COLUMNS' => 'Игнорировать столбцы',
-    'GOOGLE_SHEET_ID'=>'ID таблицы',
-    'GOOGLE_TOKEN'=>'Файл доступа json',
+    'GOOGLE_SHEET_ID' => 'ID таблицы',
+    'GOOGLE_TOKEN' => 'Файл доступа json',
 ];

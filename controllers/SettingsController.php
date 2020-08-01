@@ -21,6 +21,18 @@ class SettingsController extends AdminController
             'url' => ['/admin/csv']
         ];
         $this->breadcrumbs[] = $this->pageName;
+
+
+        $this->buttons[] = [
+            'label' => Yii::t('csv/default', 'EXPORT'),
+            'url' => ['/csv/default/export'],
+            'options' => ['class' => 'btn btn-success']
+        ];
+        $this->buttons[] = [
+            'label' => Yii::t('csv/default', 'IMPORT'),
+            'url' => ['/csv/default/import'],
+            'options' => ['class' => 'btn btn-success']
+        ];
         $model = new SettingsForm;
         $oldGoogleTokenFile = $model->google_token;
         if ($model->load(Yii::$app->request->post())) {
