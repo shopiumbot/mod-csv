@@ -34,21 +34,23 @@ class SettingsController extends AdminController
             'options' => ['class' => 'btn btn-success']
         ];
         $model = new SettingsForm;
-        $oldGoogleTokenFile = $model->google_token;
+       // $oldGoogleTokenFile = $model->google_token;
         if ($model->load(Yii::$app->request->post())) {
             if ($model->validate()) {
 
 
-                $attachment_wm_path = UploadedFile::getInstance($model, 'google_token');
-                if ($attachment_wm_path) {
-                    $attachment_wm_path->saveAs(Yii::getAlias('@app') . DIRECTORY_SEPARATOR . 'google_secret.' . $attachment_wm_path->extension);
-                    $model->google_token = 'google_secret.' . $attachment_wm_path->extension;
+                /*$upload = UploadedFile::getInstance($model, 'google_token');
+                if ($upload) {
+                    $upload->saveAs(Yii::getAlias('@app') . DIRECTORY_SEPARATOR . 'google_secret.' . $upload->extension);
+                    $model->google_token = 'google_secret.' . $upload->extension;
                 } else {
                     $model->google_token = $oldGoogleTokenFile;
-                }
+                }*/
 
                 $model->save();
                 Yii::$app->session->setFlash("success", Yii::t('app/default', 'SUCCESS_UPDATE'));
+            }else{
+                Yii::$app->session->setFlash("error", Yii::t('app/default', 'ERROR_UPDATE'));
             }
             return $this->refresh();
         }

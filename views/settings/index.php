@@ -9,28 +9,22 @@ use yii\helpers\ArrayHelper;
 use Google\Spreadsheet\DefaultServiceRequest;
 use Google\Spreadsheet\ServiceRequestFactory;
 
-/*  SEND TO GOOGLE SHEETS */
-$client = new Google_Client([
-    'credentials' => Yii::getAlias('@app') . '/secret.json'
-]);
+/**
+ * @var \shopium\mod\csv\models\SettingsForm $model
+ * @var \yii\web\View $this
+ */
+
 try {
-
-    $client->useApplicationDefaultCredentials();
-    $client->setApplicationName("Something to do with my representatives");
-    $client->setScopes(['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/spreadsheets']); //'https://www.googleapis.com/auth/drive',
-    if ($client->isAccessTokenExpired()) {
-        $client->refreshTokenWithAssertion();
-    }
-
+    $client = $model->getGoogleClient();
     $accessToken = $client->fetchAccessTokenWithAssertion()["access_token"];
-    /*  ServiceRequestFactory::setInstance(
+    ServiceRequestFactory::setInstance(
         new DefaultServiceRequest($accessToken)
     );
     // Get our spreadsheet
     //composer require asimlqt/php-google-spreadsheet-client
-    $spreadsheet = (new Google\Spreadsheet\SpreadsheetService)
+    /*$spreadsheet = (new Google\Spreadsheet\SpreadsheetService)
         ->getSpreadsheetFeed()
-        ->getByTitle('MyTable');
+        ->getByTitle('test');
 
     // Get the first worksheet (tab)
     $worksheets = $spreadsheet->getWorksheetFeed()->getEntries();
@@ -52,20 +46,16 @@ try {
 
 // Prints the names and majors of students in a sample spreadsheet:
 // https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
-    $spreadsheetId = '1AElm_JFUNoG4ifXPEvWAgebPRdcZdco3X411-hmrvfk';
-    // $spreadsheetId = '1trzaot9J3td_Q5kAorJm3SQdW5NgCP1IRg2N98c3a9c';
 
 
-    $test = $service->spreadsheets->get($spreadsheetId);
+    $test = $service->spreadsheets->get($model->google_sheet_id);
     $sheet = $test->getSheets();
-
-    $listName = $sheet[0]->getProperties()->getTitle();
 
     //\panix\engine\CMS::dump($sheet[0]->getProperties());die;
 //echo $test->getSpreadsheetUrl();
 
 
-    $range = $listName . '';
+    $range = $model->google_sheet_list . '';
 
     $values = [
         [
@@ -93,42 +83,53 @@ try {
         'valueInputOption' => 'USER_ENTERED'
     ];
 
-   // $result = $service->spreadsheets_values->append($spreadsheetId, $range, $body, $params);
+     $result = $service->spreadsheets_values->append($model->google_sheet_id, $range, $body, $params);
 
-   // $get = $service->spreadsheets_values->get($spreadsheetId, $range, []);
+   // $get = $service->spreadsheets_values->get($model->google_sheet_id, $range, []);
 
     //\panix\engine\CMS::dump($get->getValues());
 
 
     // printf("%f cells updated.", $result->getUpdates());
 //\panix\engine\CMS::dump($result->getUpdates());
-    /*$result = $service->spreadsheets_values->update($spreadsheetId, $range, $body, $params);
+    /*$result = $service->spreadsheets_values->update($model->google_sheet_id, $range, $body, $params);
     printf("%d cells updated.", $result->getUpdatedCells());*/
-} catch (\yii\base\Exception $e) {
-    echo $e->getMessage() . ' ' . $e->getLine() . ' ' . $e->getFile();
+
+} catch (Google_Service_Exception $e) {
+    $error = json_decode($e->getMessage());
+   // \panix\engine\CMS::dump($e);
+
 }
-$str = '=IMAGE("https://sneakerstudio.com.ua/rus_pm_%D0%96%D0%B5%D0%BD%D1%81%D0%BA%D0%B8%D0%B5-%D0%BA%D1%80%D0%BE%D1%81%D1%81%D0%BE%D0%B2%D0%BA%D0%B8-Fila-Disruptor-Low-1010302-71A-19803_2.jpg",2)';
-//$str = '=IMAGE("https://sun9-22.userapi.com/c855128/v855128088/114004/x7FdunGhaWc.jpg",2)';
-$str = '=IMAGE("https://site.com/get/folder=mydir&image=file.jpg",2)';
-//preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(\?\S+)?)/iu', $str, $match);
-preg_match('/(IMAGE).*[\'"](https?:\/\/?.*)[\'"]/iu', $str, $match);
-
-
-
-// @((https?://)?([-\\w]+\\.[-\\w\\.]+)+\\w(:\\d+)?(/([-\\w/_\\.]*(\\?\\S+)?)?)*)@
-//$preg = preg_match('/(IMAGE).*(https?:\/\/?[-\w]+\.[-\w\.]+\w(:\d+)?[-\w\/_\.]*(\?\S+)?)/iu',$str,$match);
-
-//\panix\engine\CMS::dump($preg);
-\panix\engine\CMS::dump($match);
 
 ?>
+<?php if (Yii::$app->session->hasFlash('success') && $flashed = Yii::$app->session->getFlash('success')) { ?>
+    <?php if (is_array($flashed)) { ?>
+        <?php foreach ($flashed as $flash) { ?>
+            <div class="alert alert-success"><?= $flash; ?></div>
+        <?php } ?>
+    <?php } else { ?>
+        <div class="alert alert-success"><?= $flashed; ?></div>
+    <?php } ?>
+<?php } ?>
 
+
+<?php if (Yii::$app->session->hasFlash('error') && $flashed = Yii::$app->session->getFlash('error')) { ?>
+    <?php if (is_array($flashed)) { ?>
+        <?php foreach ($flashed as $flash) { ?>
+            <div class="alert alert-danger"><?= $flash; ?></div>
+        <?php } ?>
+    <?php } else { ?>
+        <div class="alert alert-danger"><?= $flashed; ?></div>
+    <?php } ?>
+<?php } ?>
 <div class="card">
     <div class="card-header">
         <h5><?= $this->context->pageName ?></h5>
     </div>
     <?php
-    $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]);
+    $form = ActiveForm::begin(
+           // ['options' => ['enctype' => 'multipart/form-data']]
+    );
     ?>
     <div class="card-body">
         <?= $form->field($model, 'pagenum') ?>
@@ -143,8 +144,9 @@ preg_match('/(IMAGE).*[\'"](https?:\/\/?.*)[\'"]/iu', $str, $match);
             <div class="text-center mb-4">
                 <h4>Google sheets</h4>
             </div>
-            <?= $form->field($model, 'google_sheet_id') ?>
-            <?= $form->field($model, 'google_token')->fileInput() ?>
+            <?= $form->field($model, 'google_sheet_id')->hint('Разрешите доступ для: <strong>' . Yii::$app->params['google_service'] . '</strong><br/> <a href="#">Как это сделать?</a>') ?>
+            <?= $form->field($model, 'google_sheet_list')->dropDownList($model->getSheetsDropDownList()); ?>
+            <?php // $form->field($model, 'google_token')->fileInput() ?>
         <?php } ?>
     </div>
     <div class="card-footer text-center">
