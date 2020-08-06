@@ -41,51 +41,51 @@ try {
         'date' => date_create('now')->format('Y-m-d H:i:s')
     ]);*/
 
-if($model->google_sheet_id){
-    $service = new Google_Service_Sheets($client);
+    if ($model->google_sheet_id) {
+        $service = new Google_Service_Sheets($client);
 
 // Prints the names and majors of students in a sample spreadsheet:
 // https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
 
 
-    $test = $service->spreadsheets->get($model->google_sheet_id);
-    $sheet = $test->getSheets();
+        $test = $service->spreadsheets->get($model->google_sheet_id);
+        $sheet = $test->getSheets();
 
-    //\panix\engine\CMS::dump($sheet[0]->getProperties());die;
+        //\panix\engine\CMS::dump($sheet[0]->getProperties());die;
 //echo $test->getSpreadsheetUrl();
 
 
-    $range = $model->google_sheet_list . '';
+        $range = $model->google_sheet_list . '';
 
-    $values = [
-        [
-            'Наименование',
-            'Фото',
-            'РАЗМЕРНАЯ СЕТКА',
-            'Berlin',
-            'Описание',
-            date('Y-m-d H:i:s')
-        ],
-        [
-            'Andrew',
-            '2425fadsf3',
-            'Orlov',
-            'Berlin',
-            '35',
-            date('Y-m-d H:i:s')
-        ],
+        $values = [
+            [
+                'Наименование',
+                'Фото',
+                'РАЗМЕРНАЯ СЕТКА',
+                'Berlin',
+                'Описание',
+                date('Y-m-d H:i:s')
+            ],
+            [
+                'Andrew',
+                '2425fadsf3',
+                'Orlov',
+                'Berlin',
+                '35',
+                date('Y-m-d H:i:s')
+            ],
 
-    ];
-    $body = new Google_Service_Sheets_ValueRange([
-        'values' => $values,
-    ]);
-    $params = [
-        'valueInputOption' => 'USER_ENTERED'
-    ];
+        ];
+        $body = new Google_Service_Sheets_ValueRange([
+            'values' => $values,
+        ]);
+        $params = [
+            'valueInputOption' => 'USER_ENTERED'
+        ];
 
-     $result = $service->spreadsheets_values->append($model->google_sheet_id, $range, $body, $params);
-}
-   // $get = $service->spreadsheets_values->get($model->google_sheet_id, $range, []);
+        $result = $service->spreadsheets_values->append($model->google_sheet_id, $range, $body, $params);
+    }
+    // $get = $service->spreadsheets_values->get($model->google_sheet_id, $range, []);
 
     //\panix\engine\CMS::dump($get->getValues());
 
@@ -97,7 +97,7 @@ if($model->google_sheet_id){
 
 } catch (Google_Service_Exception $e) {
     $error = json_decode($e->getMessage());
-   // \panix\engine\CMS::dump($e);
+    // \panix\engine\CMS::dump($e);
 
 }
 
@@ -128,7 +128,7 @@ if($model->google_sheet_id){
     </div>
     <?php
     $form = ActiveForm::begin(
-           // ['options' => ['enctype' => 'multipart/form-data']]
+    // ['options' => ['enctype' => 'multipart/form-data']]
     );
     ?>
     <div class="card-body">
@@ -146,7 +146,7 @@ if($model->google_sheet_id){
             </div>
             <?= $form->field($model, 'google_sheet_id')->hint('Разрешите доступ для: <strong>' . Yii::$app->params['google_service'] . '</strong><br/> <a href="#">Как это сделать?</a>') ?>
             <?= $form->field($model, 'google_sheet_list')->dropDownList($model->getSheetsDropDownList()); ?>
-            <?php // $form->field($model, 'google_token')->fileInput() ?>
+
         <?php } ?>
     </div>
     <div class="card-footer text-center">

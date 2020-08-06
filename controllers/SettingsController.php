@@ -3,6 +3,7 @@
 namespace shopium\mod\csv\controllers;
 
 
+use panix\engine\CMS;
 use Yii;
 use shopium\mod\csv\models\SettingsForm;
 use core\components\controllers\AdminController;
@@ -50,6 +51,7 @@ class SettingsController extends AdminController
                 $model->save();
                 Yii::$app->session->setFlash("success", Yii::t('app/default', 'SUCCESS_UPDATE'));
             }else{
+               // CMS::dump($model->errors);die;
                 Yii::$app->session->setFlash("error", Yii::t('app/default', 'ERROR_UPDATE'));
             }
             return $this->refresh();

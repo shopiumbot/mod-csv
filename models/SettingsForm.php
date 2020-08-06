@@ -49,7 +49,7 @@ class SettingsForm extends SettingsModel
         ];
     }
 
-    public function connectValidation($attr)
+    public function connectValidation($attribute)
     {
         try {
             $service = new \Google_Service_Sheets($this->getGoogleClient());
@@ -58,9 +58,9 @@ class SettingsForm extends SettingsModel
         } catch (\Google_Service_Exception $e) {
             $error = json_decode($e->getMessage());
             if ($error) {
-                $this->addError($this->$attr, $error->error->message);
+                $this->addError($attribute, $error->error->message);
             } else {
-                $this->addError($this->$attr, 'unknown error');
+                $this->addError($attribute, 'unknown error');
             }
 
         }
