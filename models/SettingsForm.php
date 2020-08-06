@@ -93,12 +93,17 @@ class SettingsForm extends SettingsModel
     public function getSheetsDropDownList()
     {
         try {
-            $sheet = $this->getSheets()->getSheets();
-            $sheetListDropDown = [];
-            foreach ($sheet as $sh) {
-                $sheetListDropDown[$sh->getProperties()->getTitle()] = $sh->getProperties()->getTitle();
+            $sheets = $this->getSheets();
+            if ($sheets) {
+                $sheet = $sheets->getSheets();
+                $sheetListDropDown = [];
+                foreach ($sheet as $sh) {
+                    $sheetListDropDown[$sh->getProperties()->getTitle()] = $sh->getProperties()->getTitle();
+                }
+                return $sheetListDropDown;
+            } else {
+                return [];
             }
-            return $sheetListDropDown;
         } catch (\Google_Service_Exception $e) {
             $error = json_decode($e->getMessage());
             // \panix\engine\CMS::dump($error->error->message);
@@ -108,7 +113,11 @@ class SettingsForm extends SettingsModel
 
     public function getSheets()
     {
-        $service = new \Google_Service_Sheets($this->getGoogleClient());
-        return $service->spreadsheets->get($this->google_sheet_id);
+        if ($this->google_sheet_id) {
+            $service = new \Google_Service_Sheets($this->getGoogleClient());
+            return $service->spreadsheets->get($this->google_sheet_id);
+        } else {
+            return false;
+        }
     }
 }

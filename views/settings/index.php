@@ -41,7 +41,7 @@ try {
         'date' => date_create('now')->format('Y-m-d H:i:s')
     ]);*/
 
-
+if($model->google_sheet_id){
     $service = new Google_Service_Sheets($client);
 
 // Prints the names and majors of students in a sample spreadsheet:
@@ -84,7 +84,7 @@ try {
     ];
 
      $result = $service->spreadsheets_values->append($model->google_sheet_id, $range, $body, $params);
-
+}
    // $get = $service->spreadsheets_values->get($model->google_sheet_id, $range, []);
 
     //\panix\engine\CMS::dump($get->getValues());
