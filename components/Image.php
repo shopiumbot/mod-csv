@@ -86,8 +86,9 @@ class Image extends UploadedFile
         //echo $file;
         //     echo $this->tempName;die;
         // }
+        if(file_exists($this->tempName)){
         return copy($this->tempName, $file);
-
+        }
 
         /* if ($this->error == UPLOAD_ERR_OK) {
              if ($deleteTempFile) {

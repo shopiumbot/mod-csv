@@ -430,7 +430,7 @@ class Importer extends Component
                         if ((count($imagesArray) > $limit) || $model->imagesCount > $limit) {
                             $this->errors[] = [
                                 'line' => $this->line,
-                                'error' => Yii::t('shop/default', 'PRODUCT_LIMIT', count($imagesArray))
+                                'error' => Yii::t('shop/default', 'PRODUCT_LIMIT_IMAGE', count($imagesArray))
                             ];
                         } else {
                             foreach ($imagesArray as $n => $im) {
@@ -452,9 +452,9 @@ class Importer extends Component
                                             // }
                                         }
                                     }
-
-                                    $image = Image::create($im);
+                                    $image = Image::create(trim($im));
                                     if ($image) {
+
                                         $result = $model->attachImage($image);
 
                                         if ($this->deleteDownloadedImages) {
