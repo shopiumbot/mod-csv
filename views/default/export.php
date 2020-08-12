@@ -13,7 +13,7 @@ use shopium\mod\csv\components\AttributesProcessor;
  */
 
 $this->registerJs('
-    $(document).on("change","#manufacturer_id, #type_id, #filterform-manufacturer_id, #filterform-type_id", function(){
+    $(document).on("change","#manufacturer_id, #type_id, #filterform-manufacturer_id, #filterform-type_id, #filterform-format", function(){
         var fields = [];
         $.each($("#csv-form").serializeArray(), function(i, field){
             fields[field.name]=field.value;
@@ -64,7 +64,8 @@ $this->registerJs('
         <?php
         $groups = [];
 
-        foreach (AttributesProcessor::getImportExportData('eav_', Yii::$app->request->get('type_id')) as $k => $v) {
+        $type_id = (isset(Yii::$app->request->get('FilterForm')['type_id'])) ? Yii::$app->request->get('FilterForm')['type_id']:null;
+        foreach (AttributesProcessor::getImportExportData('eav_', $type_id) as $k => $v) {
         //foreach ($importer->getExportAttributes('eav_', Yii::$app->request->get('type_id')) as $k => $v) {
             if (strpos($k, 'eav_') === false) {
                 $groups['Основные'][$k] = $v;

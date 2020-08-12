@@ -91,6 +91,8 @@ class Exporter
                     $value = $p->availability;
                 } elseif ($attr === 'Количество') {
                     $value = $p->quantity;
+                } elseif ($attr === 'Описание') {
+                    $value = $p->description;
                 } elseif ($attr === 'wholesale_prices') {
                     $price = [];
                     $result = NULL;
@@ -108,12 +110,19 @@ class Exporter
                     } else {
                         $value = NULL;
                     }
-                } elseif (in_array($attr, ['switch'])) {
+                } elseif (in_array($attr, ['switch','custom_id'])) {
                     $value = $p->$attr;
                 } else {
                     $name = CMS::slug($attr);
-                    $value = $p->{'eav_' . $name}['value'];
 
+
+if($p->{'eav_' . $name}){
+    CMS::dump($p->{'eav_' . $name});die;
+
+                    $value = $p->{'eav_' . $name}['value'];
+}else{
+    //CMS::dump($name);die;
+}
                 }
 
                 //  $row[$attr] = iconv('utf-8', 'cp1251', $value); //append iconv by panix
