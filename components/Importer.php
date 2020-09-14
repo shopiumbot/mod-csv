@@ -507,7 +507,7 @@ class Importer extends Component
         $result = [];
         $parts = explode(';', $str);
         foreach ($parts as $path) {
-            $result[] = $this->getCategoryByPath(trim($path), true);
+            $result[] = $this->getCategoryByPath(trim($path));
         }
 
 
