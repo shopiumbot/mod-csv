@@ -187,6 +187,7 @@ class AttributesProcessor extends Component
     }
 
     /**
+     * @param $key
      * @param $name
      * @return Attribute
      */

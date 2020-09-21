@@ -2,6 +2,7 @@
 
 namespace shopium\mod\csv\controllers;
 
+use panix\engine\CMS;
 use PhpOffice\PhpSpreadsheet\Document\Properties;
 use Yii;
 use yii\data\ArrayDataProvider;
@@ -233,25 +234,40 @@ class DefaultController extends AdminController
         $query = Product::find();
         $count = 0;
         $pages = false;
-        if ($model->load(Yii::$app->request->get()) && $model->validate()) {
+
+        if ($model->load(Yii::$app->request->get())) {
+
+            if($model->validate()){
+
 
             //if (Yii::$app->request->get('manufacturer_id')) {
 
-            if ($get['FilterForm']['manufacturer_id'] !== 'all') {
+            if ($get['FilterForm']['manufacturer_id'] !== '') {
 
                 $manufacturers = explode(',', $model->manufacturer_id);
                 $query->applyManufacturers($manufacturers);
             }
 
+
             $query->where(['type_id' => $model->type_id]);
+
+
+
+
+
+
             $count = $query->count();
             $pages = new Pagination([
                 'totalCount' => $count,
-                'pageSize' => Yii::$app->settings->get('csv', 'pagenum')
+                'pageSize' => (int)Yii::$app->settings->get('csv', 'pagenum')
             ]);
             $query->offset($pages->offset);
             $query->limit($pages->limit);
+            }else{
+                CMS::dump($model->errors);die;
+            }
         }
+
 
 
         if (Yii::$app->request->get('attributes')) {

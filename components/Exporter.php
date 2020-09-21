@@ -117,16 +117,19 @@ class Exporter
 
 
 if($p->{'eav_' . $name}){
-    CMS::dump($p->{'eav_' . $name});die;
+    //CMS::dump($p->{'eav_' . $name});die;
 
                     $value = $p->{'eav_' . $name}['value'];
 }else{
     //CMS::dump($name);die;
+   // CMS::dump($p->{'eav_' . $name});die;
+    $value='';
 }
                 }
 
                 //  $row[$attr] = iconv('utf-8', 'cp1251', $value); //append iconv by panix
-                $row[$attr] = $value; //append iconv by panix
+
+                    $row[$attr] = $value; //append iconv by panix
             }
 
             array_push($this->rows, $row);
