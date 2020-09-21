@@ -371,6 +371,9 @@ class Importer extends Component
             if (isset($data['Описание']) && !empty($data['Описание']))
                 $model->description = $data['Описание'];
 
+            if (isset($data['Наличие']) && !empty($data['Наличие']))
+                $model->availability = (is_numeric($data['Наличие']))?$data['Наличие']:1;
+
             // Currency
             if (isset($data['Валюта']) && !empty($data['Валюта']))
                 $model->currency_id = $this->getCurrencyIdByName($data['Валюта']);
