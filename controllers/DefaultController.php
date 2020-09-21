@@ -259,7 +259,7 @@ class DefaultController extends AdminController
             $count = $query->count();
             $pages = new Pagination([
                 'totalCount' => $count,
-                'pageSize' => (int)Yii::$app->settings->get('csv', 'pagenum')
+                'pageSize' => $get['FilterForm']['page']
             ]);
             $query->offset($pages->offset);
             $query->limit($pages->limit);
