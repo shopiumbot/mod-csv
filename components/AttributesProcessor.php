@@ -126,8 +126,8 @@ class AttributesProcessor extends Component
         $multipleTypes = [Attribute::TYPE_CHECKBOX_LIST, Attribute::TYPE_DROPDOWN, Attribute::TYPE_SELECT_MANY, Attribute::TYPE_COLOR];
 
         if (in_array($attribute->type, $multipleTypes)) {
-            foreach (explode(',', $attribute_value) as $val) {
-                $option = $this->getOption($attribute, $val);
+            foreach (explode(';', $attribute_value) as $val) {
+                $option = $this->getOption($attribute, trim($val));
                 $result[] = $option->id;
             }
         } else {
@@ -270,8 +270,9 @@ class AttributesProcessor extends Component
                 $attributes[$attr->title] = $attr->title;
             }
         } else {
-            foreach (Attribute::find()->asArray()->all() as $attr) {
-                $attributes[$attr['title']] = $attr['title'];
+            foreach (Attribute::find()->all() as $attr) {
+               // if(isset($attr['translations.title']))
+                $attributes[$attr->title] = $attr->title;
             }
         }
 
