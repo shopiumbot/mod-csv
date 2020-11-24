@@ -154,11 +154,11 @@ class AttributesProcessor extends Component
             return $this->optionsCache[$cacheKey];
 
         // Search for option
-        $query = AttributeOption::find();
+        $query = AttributeOption::find()->translate();
 
 
         $query->where(['attribute_id' => $attribute->id]);
-        $query->andWhere(['value' => $val]);
+        $query->andWhere(['translate.value' => $val]);
 
 
         $option = $query->one();

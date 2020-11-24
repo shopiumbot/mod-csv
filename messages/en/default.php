@@ -38,4 +38,6 @@ return [
     'IMPORT_ALERT' => 'Before uploading a <strong>file</strong>, you must upload images if the file requires it',
     'NO_FIND_CURRENCY' => 'Currency not found: {0}',
     'PAGE' => 'Number of products in file',
+    'UPLOAD' => 'Upload',
+    'IMAGE_FOR_UPLOAD' => 'Images to import'
 ];

@@ -21,7 +21,7 @@ $this->registerJs('
 
         delete fields["attributes[]"];
         
-        window.location = "/csv/default/export?" + jQuery.param($.extend({}, fields));
+        window.location = common.baseUrl+"/csv/default/export?" + jQuery.param($.extend({}, fields));
     });
 ');
 
@@ -49,6 +49,8 @@ $this->registerJs('
                         'pagination' => $pages,
                         'prevPageLabel' => false,
                         'nextPageLabel' => false,
+                        'firstPageLabel' => false,
+                        'lastPageLabel' => false,
                         'maxButtonCount' => $count,
                         'pageType' => 'button',
                         'hideOnSinglePage' => false,
@@ -115,6 +117,8 @@ $this->registerJs('
                         'pagination' => $pages,
                         'prevPageLabel' => false,
                         'nextPageLabel' => false,
+                        'firstPageLabel' => false,
+                        'lastPageLabel' => false,
                         'maxButtonCount' => $count,
                         'pageType' => 'button',
                         'hideOnSinglePage' => false,

@@ -25,11 +25,11 @@ return [
     'REMOVE_IMAGES' => 'Видалити завантажені картинки',
     'ERROR_FILE' => 'Файл недоступний.',
     'SUCCESS_UPLOAD_IMAGES' => 'Ви успішно завантажили зображення',
-    'ERROR_COLUMN_ATTRIBUTE' => 'Атрибут <strong> {attribute} </strong> используеться основі параметрів товарів.',
+    'ERROR_COLUMN_ATTRIBUTE' => 'Атрибут <strong>{attribute}</strong> используеться основі параметрів товарів.',
     'ERROR_IMAGE' => 'Помилка в зображеннях.',
     'ERROR_IMAGE_EXTENSION' => 'Неправильний формат файлу, доступні формати: <strong>{0}</strong>',
     'REQUIRE_COLUMN' => 'Вкажіть обов\'язкову колонку <strong>{column}</strong>',
-    'LINE' => 'Рядок <strong> {0} </strong>:',
+    'LINE' => 'Рядок <strong>{0}</strong>:',
     'AND_MORE' => 'та ще ({0}).',
     'FILENAME' => 'Файл',
     'EXPORT_FORMAT' => 'Формат експорту',
@@ -38,4 +38,6 @@ return [
     'IMPORT_ALERT' => 'Перед завантаженням <strong>файлу</strong>, необхідно завантажити зображення, якщо цього вимагає файл',
     'NO_FIND_CURRENCY' => 'Не знайдено валюта: {0}',
     'PAGE' => 'Кількість товарів у файлі',
+    'UPLOAD' => 'Завантажити',
+    'IMAGE_FOR_UPLOAD' => 'Зображення для імпорту'
 ];
